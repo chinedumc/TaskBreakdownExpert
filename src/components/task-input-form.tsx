@@ -1,9 +1,10 @@
+
 "use client";
 
 import type * as React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { BrainCircuit, CalendarDays, ClipboardList, Clock, Loader2, Sparkles } from 'lucide-react';
+import { BrainCircuit, CalendarDays, ClipboardList, Clock, Hourglass, Loader2, Sparkles } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -38,8 +39,9 @@ export function TaskInputForm({ onSubmit, isLoading }: TaskInputFormProps): Reac
     resolver: zodResolver(TaskBreakdownFormSchema),
     defaultValues: {
       task: '',
-      targetTime: 1,
-      breakdownUnit: 'daily',
+      targetTime: 7,
+      targetTimeUnit: 'days',
+      planGranularity: 'daily',
     },
   });
 
@@ -77,21 +79,21 @@ export function TaskInputForm({ onSubmit, isLoading }: TaskInputFormProps): Reac
               )}
             />
 
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-3">
               <FormField
                 control={form.control}
                 name="targetTime"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="sm:col-span-1">
                     <FormLabel className="flex items-center text-lg">
                       <Clock className="mr-2 h-5 w-5" />
-                      Target Time
+                      Target Duration
                     </FormLabel>
                     <FormControl>
                       <Input type="number" placeholder="e.g., 7" {...field} className="text-base"/>
                     </FormControl>
                      <FormDescription>
-                      How long do you have to complete it? (e.g. 7 for 7 days/weeks/hours)
+                      Estimated time to complete (e.g. 7).
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -100,17 +102,46 @@ export function TaskInputForm({ onSubmit, isLoading }: TaskInputFormProps): Reac
 
               <FormField
                 control={form.control}
-                name="breakdownUnit"
+                name="targetTimeUnit"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem  className="sm:col-span-1">
                     <FormLabel className="flex items-center text-lg">
-                       <CalendarDays className="mr-2 h-5 w-5" />
-                      Breakdown Unit
+                       <Hourglass className="mr-2 h-5 w-5" />
+                      Duration Unit
                     </FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger className="text-base">
-                          <SelectValue placeholder="Select a unit" />
+                          <SelectValue placeholder="Select unit" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="hours">Hours</SelectItem>
+                        <SelectItem value="days">Days</SelectItem>
+                        <SelectItem value="months">Months</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>
+                      Unit for your target duration.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="planGranularity" // Renamed from breakdownUnit
+                render={({ field }) => (
+                  <FormItem className="sm:col-span-1">
+                    <FormLabel className="flex items-center text-lg">
+                       <CalendarDays className="mr-2 h-5 w-5" />
+                      Planning Granularity
+                    </FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="text-base">
+                          <SelectValue placeholder="Select granularity" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -120,7 +151,7 @@ export function TaskInputForm({ onSubmit, isLoading }: TaskInputFormProps): Reac
                       </SelectContent>
                     </Select>
                     <FormDescription>
-                      How should the task be broken down?
+                      How detailed should the plan be?
                     </FormDescription>
                     <FormMessage />
                   </FormItem>

@@ -1,9 +1,10 @@
+
 "use client";
 
 import type { NextPage } from 'next';
 import Image from 'next/image';
 import * as React from 'react';
-import { BrainCircuit } from 'lucide-react';
+import { BrainCircuit } from 'lucide-react'; // Not used, but kept to avoid breaking imports if re-added.
 
 import { TaskInputForm } from '@/components/task-input-form';
 import { TaskBreakdownDisplay } from '@/components/task-breakdown-display';
@@ -34,6 +35,8 @@ const Home: NextPage = () => {
     setAiError(null);
 
     try {
+      // Values already include task, targetTime, targetTimeUnit, and planGranularity
+      // due to TaskBreakdownFormValues type.
       const breakdownOutput = await taskBreakdown(values);
       setTaskBreakdownResult(breakdownOutput.breakdown);
       toast({
@@ -46,7 +49,7 @@ const Home: NextPage = () => {
       // Summarize the breakdown
       if (breakdownOutput.breakdown && breakdownOutput.breakdown.length > 0) {
         const breakdownText = breakdownOutput.breakdown
-          .map(unit => `${unit.unit}:\n${unit.tasks.join('\n- ')}\n`)
+          .map(unit => `${unit.unit}:\n- ${unit.tasks.join('\n- ')}\n`) // Ensure tasks are prefixed correctly
           .join('\n');
         
         const summaryOutput = await summarizeTaskBreakdown({ taskBreakdown: breakdownText });
