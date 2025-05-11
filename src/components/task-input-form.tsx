@@ -138,7 +138,7 @@ export function TaskInputForm({ onSubmit, isLoading }: TaskInputFormProps): Reac
                       Total Task Effort
                     </FormLabel>
                     <FormControl>
-                      <Input type="number" placeholder="e.g., 7" {...field} className="text-base"/>
+                      <Input type="number" placeholder="e.g., 7" {...field} className="text-base" min="1"/>
                     </FormControl>
                      <FormDescription>
                       Estimated total effort needed.
@@ -193,6 +193,7 @@ export function TaskInputForm({ onSubmit, isLoading }: TaskInputFormProps): Reac
                         {...field} 
                         className="text-base"
                         disabled={isDailyCommitmentDisabled}
+                        min="1"
                         onChange={(e) => {
                           const value = parseInt(e.target.value, 10);
                           field.onChange(value); // Propagate change to RHF
