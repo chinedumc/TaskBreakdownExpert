@@ -1,10 +1,9 @@
-
 "use client";
 
 import type * as React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { BrainCircuit, CalendarDays, ClipboardList, Clock, Hourglass, Loader2, Sparkles } from 'lucide-react';
+import { BrainCircuit, CalendarDays, ClipboardList, Clock, Hourglass, Loader2, Sparkles, CheckSquare } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -41,7 +40,8 @@ export function TaskInputForm({ onSubmit, isLoading }: TaskInputFormProps): Reac
       task: '',
       targetTime: 7,
       targetTimeUnit: 'days',
-      planGranularity: 'daily',
+      planGranularity: 'daily', // Defaulted and fixed
+      hoursPerDayCommitment: 2, // Default daily commitment
     },
   });
 
@@ -53,7 +53,7 @@ export function TaskInputForm({ onSubmit, isLoading }: TaskInputFormProps): Reac
           Describe Your Goal
         </CardTitle>
         <CardDescription>
-          Let our AI expert help you break down your goal into manageable steps.
+          Let our AI expert help you break down your goal into manageable daily steps based on your commitment.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -87,13 +87,13 @@ export function TaskInputForm({ onSubmit, isLoading }: TaskInputFormProps): Reac
                   <FormItem className="sm:col-span-1">
                     <FormLabel className="flex items-center text-lg">
                       <Clock className="mr-2 h-5 w-5" />
-                      Target Duration
+                      Total Task Effort
                     </FormLabel>
                     <FormControl>
                       <Input type="number" placeholder="e.g., 7" {...field} className="text-base"/>
                     </FormControl>
                      <FormDescription>
-                      Estimated time to complete (e.g. 7).
+                      Estimated total effort needed.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -107,7 +107,7 @@ export function TaskInputForm({ onSubmit, isLoading }: TaskInputFormProps): Reac
                   <FormItem  className="sm:col-span-1">
                     <FormLabel className="flex items-center text-lg">
                        <Hourglass className="mr-2 h-5 w-5" />
-                      Duration Unit
+                      Effort Unit
                     </FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
@@ -117,12 +117,12 @@ export function TaskInputForm({ onSubmit, isLoading }: TaskInputFormProps): Reac
                       </FormControl>
                       <SelectContent>
                         <SelectItem value="hours">Hours</SelectItem>
-                        <SelectItem value="days">Days</SelectItem>
-                        <SelectItem value="months">Months</SelectItem>
+                        <SelectItem value="days">Days (8h/day)</SelectItem>
+                        <SelectItem value="months">Months (20x8h days)</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormDescription>
-                      Unit for your target duration.
+                      Unit for total task effort.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -131,33 +131,40 @@ export function TaskInputForm({ onSubmit, isLoading }: TaskInputFormProps): Reac
               
               <FormField
                 control={form.control}
-                name="planGranularity" // Renamed from breakdownUnit
+                name="hoursPerDayCommitment"
                 render={({ field }) => (
                   <FormItem className="sm:col-span-1">
                     <FormLabel className="flex items-center text-lg">
                        <CalendarDays className="mr-2 h-5 w-5" />
-                      Planning Granularity
+                      Daily Commitment
                     </FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger className="text-base">
-                          <SelectValue placeholder="Select granularity" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="hourly">Hourly</SelectItem>
-                        <SelectItem value="daily">Daily</SelectItem>
-                        <SelectItem value="weekly">Weekly</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <FormControl>
+                      <Input type="number" placeholder="e.g., 2" {...field} className="text-base"/>
+                    </FormControl>
                     <FormDescription>
-                      How detailed should the plan be?
+                      Hours you'll dedicate per day.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
+             {/* planGranularity is now fixed to 'daily' and handled by default schema value, so no UI element needed or a static display */}
+             <FormItem>
+                <FormLabel className="flex items-center text-lg">
+                    <CheckSquare className="mr-2 h-5 w-5 text-primary" />
+                    Plan Structure
+                </FormLabel>
+                <p className="text-sm text-muted-foreground pt-1">
+                    Your tasks will be broken down into a <span className="font-semibold text-foreground">daily plan</span>.
+                </p>
+                {/* Hidden field to ensure 'daily' is submitted if not relying purely on schema default during submission object construction */}
+                <FormField
+                    control={form.control}
+                    name="planGranularity"
+                    render={({ field }) => <Input type="hidden" {...field} />}
+                />
+            </FormItem>
             
             <Button type="submit" disabled={isLoading} className="w-full text-lg py-6">
               {isLoading ? (
@@ -168,7 +175,7 @@ export function TaskInputForm({ onSubmit, isLoading }: TaskInputFormProps): Reac
               ) : (
                 <>
                   <Sparkles className="mr-2 h-5 w-5" />
-                  Generate Breakdown
+                  Generate Detailed Daily Plan
                 </>
               )}
             </Button>

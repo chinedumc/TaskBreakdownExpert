@@ -1,9 +1,10 @@
 'use server';
 
 /**
- * @fileOverview This file defines a Genkit flow for breaking down a task into achievable units based on user input.
+ * @fileOverview This file defines a Genkit flow for breaking down a task into specific, actionable daily sub-tasks
+ * based on user input, including their daily time commitment.
  *
- * - taskBreakdown - A function that accepts task details and returns a breakdown of the task into achievable units.
+ * - taskBreakdown - A function that accepts task details and returns a detailed daily breakdown.
  * - TaskBreakdownInput - The input type for the taskBreakdown function.
  * - TaskBreakdownOutput - The return type for the taskBreakdown function.
  */
@@ -13,9 +14,10 @@ import {z} from 'genkit';
 
 const TaskBreakdownInputSchema = z.object({
   task: z.string().describe('The task or goal to be achieved.'),
-  targetTime: z.number().describe('The numeric value of the target completion duration (e.g., 7).'),
-  targetTimeUnit: z.enum(['hours', 'days', 'months']).describe('The unit for the target completion duration (e.g., hours, days, months).'),
-  planGranularity: z.enum(['hourly', 'daily', 'weekly']).describe('The desired granularity for breaking down the task (e.g., plan tasks per hour, day, or week).'),
+  targetTime: z.number().describe('The numeric value of the total estimated effort for the task (e.g., 7).'),
+  targetTimeUnit: z.enum(['hours', 'days', 'months']).describe('The unit for the total estimated effort (e.g., hours, days, months).'),
+  planGranularity: z.enum(['daily']).describe('The planning granularity, fixed to daily.'),
+  hoursPerDayCommitment: z.number().min(1).max(24).describe('The number of hours the user commits to working on the task per day.'),
 });
 
 export type TaskBreakdownInput = z.infer<typeof TaskBreakdownInputSchema>;
@@ -23,10 +25,10 @@ export type TaskBreakdownInput = z.infer<typeof TaskBreakdownInputSchema>;
 const TaskBreakdownOutputSchema = z.object({
   breakdown: z.array(
     z.object({
-      unit: z.string().describe('The time unit (e.g., "Hour 1", "Day 1", "Week 1"), reflecting the planGranularity.'),
-      tasks: z.array(z.string()).describe('The list of tasks to be achieved in that time unit.'),
+      unit: z.string().describe('The time unit, e.g., "Day 1 (X hours focus)", where X is the daily commitment.'),
+      tasks: z.array(z.string()).describe('A list of specific, actionable sub-tasks to be achieved that day, fitting within the daily committed hours.'),
     })
-  ).describe('The breakdown of the task into achievable units for each time unit, based on the planGranularity.'),
+  ).describe('The detailed daily breakdown of the task into specific, actionable sub-tasks.'),
 });
 
 export type TaskBreakdownOutput = z.infer<typeof TaskBreakdownOutputSchema>;
@@ -39,63 +41,62 @@ const taskBreakdownPrompt = ai.definePrompt({
   name: 'taskBreakdownPrompt',
   input: {schema: TaskBreakdownInputSchema},
   output: {schema: TaskBreakdownOutputSchema},
-  prompt: `You are an expert project manager. Your job is to break down a large task into smaller, achievable units according to a specified planning granularity.
+  prompt: `You are an expert project manager and learning coach. Your job is to break down a large task into a detailed daily plan composed of smaller, highly specific, and actionable sub-tasks.
 
-The task to break down is: {{{task}}}
-The total target completion time for this task is: {{{targetTime}}} {{{targetTimeUnit}}}.
-You should break this down into sub-tasks planned on a {{{planGranularity}}} basis.
+TASK DETAILS:
+- The main task or goal: {{{task}}}
+- Total estimated effort for this task: {{{targetTime}}} {{{targetTimeUnit}}}.
+- User's daily commitment: {{{hoursPerDayCommitment}}} hours per day.
+- Planning granularity: Daily (this is fixed).
 
+CONVERSION GUIDELINES FOR TOTAL EFFORT:
+- If {{{targetTimeUnit}}} is 'hours', TotalEffortInHours is {{{targetTime}}}.
+- If {{{targetTimeUnit}}} is 'days', assume 1 day of effort = 8 hours. So, TotalEffortInHours = {{{targetTime}}} * 8.
+- If {{{targetTimeUnit}}} is 'months', assume 1 month of effort = 20 working days, and 1 working day = 8 hours. So, TotalEffortInHours = {{{targetTime}}} * 20 * 8.
+
+PLAN GENERATION REQUIREMENTS:
+1.  Calculate the TotalEffortInHours based on {{{targetTime}}} and {{{targetTimeUnit}}} using the conversion guidelines above.
+2.  Determine the number of days required for the plan: NumberOfDays = ceil(TotalEffortInHours / {{{hoursPerDayCommitment}}}).
+3.  Create a daily plan spanning these NumberOfDays. Each day in the plan should be labeled as "Day N (X hours focus)", where N is the day number and X is {{{hoursPerDayCommitment}}}.
+4.  For each day, list specific, actionable sub-tasks. Each sub-task in the 'tasks' array must be a single, concrete step.
+    - BAD: "Learn about Next.js features."
+    - GOOD:
+        - "Read the official Next.js documentation on 'File-based Routing'."
+        - "Watch a tutorial explaining Server Components in Next.js."
+        - "Complete exercise 3 from the Next.js beginner course focusing on API routes."
+5.  The combined sub-tasks for each day must be realistically achievable within the user's {{{hoursPerDayCommitment}}}-hour daily commitment.
+6.  The entire set of daily plans must comprehensively cover the main task.
+
+OUTPUT JSON FORMAT:
 Return a JSON object that contains a key called "breakdown".
-
 The "breakdown" key should be an array of objects.
-Each object in the breakdown array should represent one period of the specified {{{planGranularity}}} (e.g., if {{{planGranularity}}} is 'daily', then 'Day 1', 'Day 2', etc.; if 'hourly', then 'Hour 1', 'Hour 2', etc.).
-Each object should have the following keys:
-  - unit: A string describing the planning period (e.g., "Hour 1", "Day 1", "Week 1"). This string must reflect the {{{planGranularity}}}. For instance, if {{{planGranularity}}} is 'daily', units should be "Day 1", "Day 2", ... "Day N", where N is based on the overall {{{targetTime}}} and {{{targetTimeUnit}}}. If {{{planGranularity}}} is 'hourly', units should be "Hour 1", "Hour 2", ..., "Hour M". If {{{planGranularity}}} is 'weekly', units should be "Week 1", "Week 2", ..., "Week P".
-  - tasks: An array of strings that describe the tasks to be achieved in that planning period.
+Each object in the breakdown array represents one day of the plan and should have:
+  - unit: A string describing the day and commitment (e.g., "Day 1 ({{{hoursPerDayCommitment}}} hours focus)").
+  - tasks: An array of strings. Each string is a single, specific, actionable sub-task.
 
-Ensure the number of units in the breakdown corresponds appropriately to the overall target completion time ({{{targetTime}}} {{{targetTimeUnit}}}) and the specified {{{planGranularity}}}. For example, if the target is 2 days and granularity is daily, provide 2 daily units. If the target is 1 week and granularity is daily, provide 7 daily units. If the target is 3 hours and granularity is hourly, provide 3 hourly units.
+EXAMPLE (if task is "Learn basic cooking", targetTime is 10, targetTimeUnit is 'hours', and hoursPerDayCommitment is 2):
+TotalEffortInHours = 10 hours.
+NumberOfDays = ceil(10 / 2) = 5 days.
 
-Example (if targetTime is 2, targetTimeUnit is 'days', and planGranularity is 'daily'):
 {
   "breakdown": [
     {
-      "unit": "Day 1",
+      "unit": "Day 1 (2 hours focus)",
       "tasks": [
-        "Research the topic",
-        "Create an outline",
-      ],
+        "Research basic knife skills: Watch three introductory videos on YouTube about holding a knife and basic cuts (dice, chop, mince).",
+        "Practice dicing an onion: Follow a video guide and dice one medium onion.",
+        "Learn about mise en place: Read an article explaining its importance in cooking."
+      ]
     },
     {
-      "unit": "Day 2",
+      "unit": "Day 2 (2 hours focus)",
       "tasks": [
-        "Write the introduction",
-        "Write the first section",
-      ],
-    }
-  ]
-}
-
-Example (if targetTime is 3, targetTimeUnit is 'hours', and planGranularity is 'hourly'):
-{
-  "breakdown": [
-    {
-      "unit": "Hour 1",
-      "tasks": [
-        "Task A for hour 1",
-      ],
+        "Understand heat control: Read about different heat levels (low, medium, high) and their uses for stovetop cooking.",
+        "Cook a simple scrambled egg: Focus on controlling heat to achieve desired texture.",
+        "Learn to boil water and cook pasta: Follow package instructions for 100g of pasta."
+      ]
     },
-    {
-      "unit": "Hour 2",
-      "tasks": [
-        "Task B for hour 2",
-      ],
-    },
-    {
-      "unit": "Hour 3",
-      "tasks": [
-        "Task C for hour 3",
-      ],
-    }
+    // ... (Day 3, Day 4, Day 5 with similarly detailed tasks for 2 hours each)
   ]
 }
   `,
