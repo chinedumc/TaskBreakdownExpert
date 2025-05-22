@@ -92,7 +92,7 @@ const Home: NextPage = () => {
       <div className="container mx-auto flex min-h-screen flex-col items-center px-4 py-8 sm:py-12 md:py-16">
         <header className="mb-10 text-center">
           <div className="flex items-center justify-center gap-3 mb-4">
-             <Image src="https://placehold.co/60x60.png" alt="Task Breakdown Expert Logo" width={60} height={60} className="rounded-full" data-ai-hint="productivity brain" />
+             <Image src="https://placehold.co/60x60.png" alt="Task Breakdown Expert Logo" width={60} height={60} className="rounded-full" data-ai-hint="creative lightbulb" />
             <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
               Task Breakdown <span className="text-primary">Expert</span>
             </h1>
