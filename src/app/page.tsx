@@ -4,11 +4,13 @@
 import type { NextPage } from 'next';
 import Image from 'next/image';
 import * as React from 'react';
-import { BrainCircuit } from 'lucide-react'; // Not used, but kept to avoid breaking imports if re-added.
+// BrainCircuit is not used, but kept to avoid breaking imports if re-added.
+// import { BrainCircuit } from 'lucide-react'; 
 
 import { TaskInputForm } from '@/components/task-input-form';
 import { TaskBreakdownDisplay } from '@/components/task-breakdown-display';
 import { EmailExport } from '@/components/email-export';
+import { DownloadBreakdown } from '@/components/download-breakdown'; // Added import
 import { Toaster } from '@/components/ui/toaster';
 import { useToast } from '@/hooks/use-toast';
 import type { TaskBreakdownFormValues, EmailExportFormValues } from '@/lib/schemas';
@@ -35,8 +37,6 @@ const Home: NextPage = () => {
     setAiError(null);
 
     try {
-      // Values already include task, targetTime, targetTimeUnit, and planGranularity
-      // due to TaskBreakdownFormValues type.
       const breakdownOutput = await taskBreakdown(values);
       setTaskBreakdownResult(breakdownOutput.breakdown);
       toast({
@@ -46,10 +46,9 @@ const Home: NextPage = () => {
       });
       setIsLoadingBreakdown(false);
 
-      // Summarize the breakdown
       if (breakdownOutput.breakdown && breakdownOutput.breakdown.length > 0) {
         const breakdownText = breakdownOutput.breakdown
-          .map(unit => `${unit.unit}:\n- ${unit.tasks.join('\n- ')}\n`) // Ensure tasks are prefixed correctly
+          .map(unit => `${unit.unit}:\n- ${unit.tasks.join('\n- ')}\n`)
           .join('\n');
         
         const summaryOutput = await summarizeTaskBreakdown({ taskBreakdown: breakdownText });
@@ -78,11 +77,8 @@ const Home: NextPage = () => {
     setIsSubmittingEmail(true);
     setAiError(null);
     console.log("Simulating email export to:", values.email);
-    // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1500));
     
-    // This is where actual PDF generation and email sending logic would go.
-    // For now, we'll just show a success toast.
     toast({
       title: "Email Sent (Simulated)",
       description: `Task breakdown would be sent to ${values.email}.`,
@@ -96,7 +92,7 @@ const Home: NextPage = () => {
       <div className="container mx-auto flex min-h-screen flex-col items-center px-4 py-8 sm:py-12 md:py-16">
         <header className="mb-10 text-center">
           <div className="flex items-center justify-center gap-3 mb-4">
-             <Image src="https://picsum.photos/80/80" alt="Task Breakdown Expert Logo" width={60} height={60} className="rounded-full" data-ai-hint="productivity brain" />
+             <Image src="https://placehold.co/80x80.png" alt="Task Breakdown Expert Logo" width={60} height={60} className="rounded-full" data-ai-hint="productivity brain" />
             <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
               Task Breakdown <span className="text-primary">Expert</span>
             </h1>
@@ -127,7 +123,10 @@ const Home: NextPage = () => {
           )}
 
           {taskBreakdownResult && !isLoadingBreakdown && !isLoadingSummary && (
-            <EmailExport onSubmitEmail={handleEmailSubmit} isExporting={isSubmittingEmail} />
+            <div className="space-y-6"> {/* Wrapper for consistent spacing */}
+              <EmailExport onSubmitEmail={handleEmailSubmit} isExporting={isSubmittingEmail} />
+              <DownloadBreakdown breakdown={taskBreakdownResult} />
+            </div>
           )}
         </main>
         <footer className="mt-16 w-full max-w-3xl border-t pt-8 text-center">
