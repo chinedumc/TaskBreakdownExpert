@@ -117,7 +117,7 @@ export function TaskInputForm({ onSubmit, isLoading }: TaskInputFormProps): Reac
                     Task or Goal
                   </FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., Learn Next.js and build a project" {...field} className="text-base"/>
+                    <Input placeholder="e.g., Learn Next.js and build projects each step of the way" {...field} className="text-base"/>
                   </FormControl>
                   <FormDescription>
                     What do you want to achieve? Be specific for better results.
