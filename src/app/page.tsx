@@ -12,7 +12,7 @@ import { TaskInputForm } from '@/components/task-input-form';
 import { TaskBreakdownDisplay } from '@/components/task-breakdown-display';
 import { EmailExport } from '@/components/email-export';
 import { DownloadBreakdown } from '@/components/download-breakdown'; // Added import
-import { Toaster } from '@/components/ui/toaster';
+// Toaster import removed as it's handled in layout.tsx
 import { useToast } from '@/hooks/use-toast';
 import type { TaskBreakdownFormValues, EmailExportFormValues } from '@/lib/schemas';
 import { taskBreakdown, type TaskBreakdownOutput } from '@/ai/flows/task-breakdown';
@@ -139,7 +139,7 @@ const Home: NextPage = () => {
           </p>
         </footer>
       </div>
-      <Toaster />
+      {/* Toaster component removed from here, as it's in layout.tsx */}
     </>
   );
 };
