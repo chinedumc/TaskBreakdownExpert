@@ -15,7 +15,9 @@ import { DownloadBreakdown } from '@/components/download-breakdown'; // Added im
 // Toaster import removed as it's handled in layout.tsx
 import { useToast } from '@/hooks/use-toast';
 import type { TaskBreakdownFormValues, EmailExportFormValues } from '@/lib/schemas';
+import { ai } from '@/ai/openai';
 import { taskBreakdown, type TaskBreakdownOutput } from '@/ai/flows/task-breakdown';
+import { logger } from '@/utils/logger';
 import { summarizeTaskBreakdown } from '@/ai/flows/task-summary';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Terminal } from "lucide-react";
@@ -24,13 +26,14 @@ import { Terminal } from "lucide-react";
 const Home: NextPage = () => {
   const { toast } = useToast();
   const [taskSummary, setTaskSummary] = React.useState<string | null>(null);
-  const [taskBreakdownResult, setTaskBreakdownResult] = React.useState<TaskBreakdownOutput['breakdown'] | null>(null);
+  const [taskBreakdownResult, setTaskBreakdownResult] = React.useState<TaskBreakdownOutput | null>(null);
   const [isLoadingBreakdown, setIsLoadingBreakdown] = React.useState(false);
   const [isLoadingSummary, setIsLoadingSummary] = React.useState(false);
   const [isSubmittingEmail, setIsSubmittingEmail] = React.useState(false);
   const [aiError, setAiError] = React.useState<string | null>(null);
 
   const handleTaskSubmit = async (values: TaskBreakdownFormValues) => {
+    await logger.logUserAction('Task Submission', values);
     setIsLoadingBreakdown(true);
     setIsLoadingSummary(true);
     setTaskSummary(null);
@@ -38,8 +41,38 @@ const Home: NextPage = () => {
     setAiError(null);
 
     try {
-      const breakdownOutput = await taskBreakdown(values);
-      setTaskBreakdownResult(breakdownOutput.breakdown);
+      await logger.logUserAction('Task Breakdown Request', {
+        task: values.task,
+        targetTime: values.targetTime,
+        targetTimeUnit: values.targetTimeUnit,
+        hoursPerDayCommitment: values.hoursPerDayCommitment
+      });
+
+      let breakdownOutput;
+      try {
+        breakdownOutput = await taskBreakdown(values);
+        await logger.logOpenAIResponse('Task Breakdown', breakdownOutput);
+
+        if (!breakdownOutput.breakdown || breakdownOutput.breakdown.length === 0) {
+          throw new Error('No breakdown data received from AI');
+        }
+
+        // Log successful breakdown
+        await logger.logUserAction('Task Breakdown Success', {
+          task: values.task,
+          breakdownLength: breakdownOutput.breakdown.length
+        });
+
+      } catch (breakdownError) {
+        const errorMessage = breakdownError instanceof Error ? breakdownError.message : 'Unknown error occurred';
+        await logger.logUserAction('Task Breakdown Error', {
+          task: values.task,
+          error: errorMessage
+        });
+        throw breakdownError;
+      }
+
+      setTaskBreakdownResult(breakdownOutput);
       toast({
         title: "Task Breakdown Generated!",
         description: "Your detailed plan is ready.",
@@ -47,18 +80,25 @@ const Home: NextPage = () => {
       });
       setIsLoadingBreakdown(false);
 
-      if (breakdownOutput.breakdown && breakdownOutput.breakdown.length > 0) {
-        const breakdownText = breakdownOutput.breakdown
-          .map(unit => `${unit.unit}:\n- ${unit.tasks.join('\n- ')}\n`)
-          .join('\n');
-        
-        const summaryOutput = await summarizeTaskBreakdown({ taskBreakdown: breakdownText });
-        setTaskSummary(summaryOutput.summary);
-         toast({
-          title: "Summary Ready!",
-          description: "A concise overview of your plan is available.",
-        });
+      const breakdownText = breakdownOutput.breakdown
+        .map(unit => `${unit.unit}:\n- ${unit.tasks.join('\n- ')}\n`)
+        .join('\n');
+      
+      await logger.logUserAction('Summary Request', { breakdownText });
+      
+      const summaryOutput = await summarizeTaskBreakdown({ taskBreakdown: breakdownText });
+      await logger.logOpenAIResponse('Summary', summaryOutput);
+
+      if (!summaryOutput.summary) {
+        throw new Error('No summary received from AI');
       }
+
+      setTaskSummary(summaryOutput.summary);
+      toast({
+        title: "Summary Ready!",
+        description: "A concise overview of your plan is available.",
+        variant: "default",
+      });
     } catch (error) {
       console.error("Error processing task:", error);
       const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred.";
@@ -75,6 +115,7 @@ const Home: NextPage = () => {
   };
 
   const handleEmailSubmit = async (values: EmailExportFormValues) => {
+    await logger.logUserAction('Email Export Request', values);
     setIsSubmittingEmail(true);
     setAiError(null);
     console.log("Simulating email export to:", values.email);
@@ -117,19 +158,26 @@ const Home: NextPage = () => {
             </Alert>
           )}
 
-          {(isLoadingBreakdown || isLoadingSummary || taskBreakdownResult || taskSummary) && (
-            <TaskBreakdownDisplay
-              summary={taskSummary}
-              breakdown={taskBreakdownResult}
-              isLoadingSummary={isLoadingSummary}
-              isLoadingBreakdown={isLoadingBreakdown}
-            />
-          )}
+          {isLoadingBreakdown || isLoadingSummary ? (
+             <TaskBreakdownDisplay
+               summary={null}
+               breakdown={null}
+               isLoadingSummary={isLoadingSummary}
+               isLoadingBreakdown={isLoadingBreakdown}
+             />
+           ) : taskBreakdownResult || taskSummary ? (
+             <TaskBreakdownDisplay
+               summary={taskSummary}
+               breakdown={taskBreakdownResult?.breakdown ?? []}
+               isLoadingSummary={false}
+               isLoadingBreakdown={false}
+             />
+           ) : null}
 
           {taskBreakdownResult && !isLoadingBreakdown && !isLoadingSummary && (
             <div className="space-y-6"> {/* Wrapper for consistent spacing */}
               <EmailExport onSubmitEmail={handleEmailSubmit} isExporting={isSubmittingEmail} />
-              <DownloadBreakdown breakdown={taskBreakdownResult} />
+              <DownloadBreakdown breakdown={taskBreakdownResult?.breakdown ?? []} />
             </div>
           )}
         </main>

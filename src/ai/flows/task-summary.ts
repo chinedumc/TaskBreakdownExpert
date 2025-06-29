@@ -8,8 +8,8 @@
  * - SummarizeTaskBreakdownOutput - The return type for the summarizeTaskBreakdown function.
  */
 
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import { z } from 'zod';
+import { ai } from '@/ai/openai';
 
 const SummarizeTaskBreakdownInputSchema = z.object({
   taskBreakdown: z
@@ -25,46 +25,19 @@ const SummarizeTaskBreakdownOutputSchema = z.object({
 export type SummarizeTaskBreakdownOutput = z.infer<typeof SummarizeTaskBreakdownOutputSchema>;
 
 export async function summarizeTaskBreakdown(input: SummarizeTaskBreakdownInput): Promise<SummarizeTaskBreakdownOutput> {
-  return summarizeTaskBreakdownFlow(input);
-}
-
-const prompt = ai.definePrompt({
-  name: 'summarizeTaskBreakdownPrompt',
-  input: {schema: SummarizeTaskBreakdownInputSchema},
-  output: {schema: SummarizeTaskBreakdownOutputSchema},
-  prompt: `Summarize the following task breakdown in one short sentence:\n\n{{{taskBreakdown}}}`,config: {
-    safetySettings: [
+  const completion = await ai.chat.completions.create({
+    model: 'gpt-3.5-turbo',
+    messages: [
       {
-        category: 'HARM_CATEGORY_HATE_SPEECH',
-        threshold: 'BLOCK_ONLY_HIGH',
-      },
-      {
-        category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
-        threshold: 'BLOCK_NONE',
-      },
-      {
-        category: 'HARM_CATEGORY_HARASSMENT',
-        threshold: 'BLOCK_MEDIUM_AND_ABOVE',
-      },
-      {
-        category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
-        threshold: 'BLOCK_LOW_AND_ABOVE',
-      },
+        role: 'system',
+        content: `Summarize the following task breakdown in one short sentence:\n\n${input.taskBreakdown}`
+      }
     ],
-  },
-});
+    temperature: 0.7
+  });
 
-const summarizeTaskBreakdownFlow = ai.defineFlow(
-  {
-    name: 'summarizeTaskBreakdownFlow',
-    inputSchema: SummarizeTaskBreakdownInputSchema,
-    outputSchema: SummarizeTaskBreakdownOutputSchema,
-  },
-  async input => {
-    const {output} = await prompt(input);
-    return {
-      ...output!,
-      progress: 'The AI has summarized the task breakdown into one short sentence.',
-    };
-  }
-);
+  return {
+    summary: completion.choices[0].message.content || '',
+    progress: 'Summary generated successfully'
+  };
+}

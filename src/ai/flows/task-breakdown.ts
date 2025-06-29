@@ -1,7 +1,7 @@
 'use server';
 
 /**
- * @fileOverview This file defines a Genkit flow for breaking down a task into specific, actionable daily sub-tasks
+ * @fileOverview This file defines a function for breaking down a task into specific, actionable daily sub-tasks
  * based on user input, including their daily time commitment.
  *
  * - taskBreakdown - A function that accepts task details and returns a detailed daily breakdown.
@@ -9,8 +9,10 @@
  * - TaskBreakdownOutput - The return type for the taskBreakdown function.
  */
 
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import { ai } from '@/ai/openai';
+import { ServerLogger } from '@/utils/logger';
+const serverLogger = new ServerLogger();
+import { z } from 'zod';
 
 const TaskBreakdownInputSchema = z.object({
   task: z.string().describe('The task or goal to be achieved.'),
@@ -33,83 +35,78 @@ const TaskBreakdownOutputSchema = z.object({
 
 export type TaskBreakdownOutput = z.infer<typeof TaskBreakdownOutputSchema>;
 
-export async function taskBreakdown(input: TaskBreakdownInput): Promise<TaskBreakdownOutput> {
-  return taskBreakdownFlow(input);
-}
-
-const taskBreakdownPrompt = ai.definePrompt({
-  name: 'taskBreakdownPrompt',
-  input: {schema: TaskBreakdownInputSchema},
-  output: {schema: TaskBreakdownOutputSchema},
-  prompt: `You are an expert project manager and learning coach. Your job is to break down a large task into a detailed daily plan composed of smaller, highly specific, and actionable sub-tasks.
-
-TASK DETAILS:
-- The main task or goal: {{{task}}}
-- Total estimated effort for this task: {{{targetTime}}} {{{targetTimeUnit}}}.
-- User's daily commitment: {{{hoursPerDayCommitment}}} hours per day.
-- Planning granularity: Daily (this is fixed).
-
-CONVERSION GUIDELINES FOR TOTAL EFFORT:
-- If {{{targetTimeUnit}}} is 'hours', TotalEffortInHours is {{{targetTime}}}.
-- If {{{targetTimeUnit}}} is 'days', assume 1 day of effort = 8 hours. So, TotalEffortInHours = {{{targetTime}}} * 8.
-- If {{{targetTimeUnit}}} is 'months', assume 1 month of effort = 20 working days, and 1 working day = 8 hours. So, TotalEffortInHours = {{{targetTime}}} * 20 * 8.
-
-PLAN GENERATION REQUIREMENTS:
-1.  Calculate the TotalEffortInHours based on {{{targetTime}}} and {{{targetTimeUnit}}} using the conversion guidelines above.
-2.  Determine the number of days required for the plan: NumberOfDays = ceil(TotalEffortInHours / {{{hoursPerDayCommitment}}}).
-3.  Create a daily plan spanning these NumberOfDays. Each day in the plan should be labeled as "Day N (X hours focus)", where N is the day number and X is {{{hoursPerDayCommitment}}}.
-4.  For each day, list specific, actionable sub-tasks. Each sub-task in the 'tasks' array must be a single, concrete step.
-    - BAD: "Learn about Next.js features."
-    - GOOD:
-        - "Read the official Next.js documentation on 'File-based Routing'."
-        - "Watch a tutorial explaining Server Components in Next.js."
-        - "Complete exercise 3 from the Next.js beginner course focusing on API routes."
-5.  The combined sub-tasks for each day must be realistically achievable within the user's {{{hoursPerDayCommitment}}}-hour daily commitment.
-6.  The entire set of daily plans must comprehensively cover the main task.
-
-OUTPUT JSON FORMAT:
-Return a JSON object that contains a key called "breakdown".
-The "breakdown" key should be an array of objects.
-Each object in the breakdown array represents one day of the plan and should have:
-  - unit: A string describing the day and commitment (e.g., "Day 1 ({{{hoursPerDayCommitment}}} hours focus)").
-  - tasks: An array of strings. Each string is a single, specific, actionable sub-task.
-
-EXAMPLE (if task is "Learn basic cooking", targetTime is 10, targetTimeUnit is 'hours', and hoursPerDayCommitment is 2):
-TotalEffortInHours = 10 hours.
-NumberOfDays = ceil(10 / 2) = 5 days.
-
-{
-  "breakdown": [
-    {
-      "unit": "Day 1 (2 hours focus)",
-      "tasks": [
-        "Research basic knife skills: Watch three introductory videos on YouTube about holding a knife and basic cuts (dice, chop, mince).",
-        "Practice dicing an onion: Follow a video guide and dice one medium onion.",
-        "Learn about mise en place: Read an article explaining its importance in cooking."
-      ]
+// Define the function for OpenAI
+const taskBreakdownFunction = {
+  name: "taskBreakdown",
+  description: "Breaks down a task into specific, actionable daily sub-tasks based on user input",
+  parameters: {
+    type: "object",
+    properties: {
+      task: {
+        type: "string",
+        description: "The task to be broken down"
+      },
+      targetTime: {
+        type: "number",
+        description: "The target time for completion"
+      },
+      targetTimeUnit: {
+        type: "string",
+        enum: ["hours", "days", "months"],
+        description: "The unit of time for targetTime"
+      },
+      planGranularity: {
+        type: "string",
+        enum: ["daily"],
+        description: "The granularity of the plan"
+      },
+      hoursPerDayCommitment: {
+        type: "number",
+        description: "The number of hours available per day for the task"
+      }
     },
-    {
-      "unit": "Day 2 (2 hours focus)",
-      "tasks": [
-        "Understand heat control: Read about different heat levels (low, medium, high) and their uses for stovetop cooking.",
-        "Cook a simple scrambled egg: Focus on controlling heat to achieve desired texture.",
-        "Learn to boil water and cook pasta: Follow package instructions for 100g of pasta."
-      ]
-    },
-    // ... (Day 3, Day 4, Day 5 with similarly detailed tasks for 2 hours each)
-  ]
-}
-  `,
-});
-
-const taskBreakdownFlow = ai.defineFlow(
-  {
-    name: 'taskBreakdownFlow',
-    inputSchema: TaskBreakdownInputSchema,
-    outputSchema: TaskBreakdownOutputSchema,
-  },
-  async input => {
-    const {output} = await taskBreakdownPrompt(input);
-    return output!;
+    required: ["task", "targetTime", "targetTimeUnit", "planGranularity", "hoursPerDayCommitment"]
   }
-);
+};
+
+export async function taskBreakdown(values: TaskBreakdownInput): Promise<TaskBreakdownOutput> {
+  try {
+    serverLogger.logUserAction('Task Breakdown Request', {
+      task: values.task,
+      targetTime: values.targetTime,
+      targetTimeUnit: values.targetTimeUnit,
+      hoursPerDayCommitment: values.hoursPerDayCommitment
+    });
+
+    const response = await ai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [
+        { 
+          role: "system",
+          content: "You are a task breakdown expert. Break down tasks into daily actionable sub-tasks."
+        },
+        { 
+          role: "user",
+          content: `Break down this task into daily actionable sub-tasks:
+          Task: ${values.task}
+          Target Time: ${values.targetTime} ${values.targetTimeUnit}
+          Daily Commitment: ${values.hoursPerDayCommitment} hours`
+        }
+      ],
+      functions: [taskBreakdownFunction],
+      function_call: { name: "taskBreakdown" }
+    });
+
+    const choice = response.choices[0];
+    if (!choice?.message?.function_call?.arguments) {
+      throw new Error('Invalid OpenAI response: missing function call arguments');
+    }
+
+    const parsedResponse = TaskBreakdownOutputSchema.parse(choice.message.function_call.arguments);
+    await serverLogger.logOpenAIResponse('Task Breakdown', parsedResponse);
+    return parsedResponse;
+  } catch (error) {
+    await serverLogger.logError(error as Error, 'Task Breakdown');
+    throw error;
+  }
+}
