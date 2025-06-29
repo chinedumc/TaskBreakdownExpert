@@ -1,12 +1,12 @@
-
 "use client";
 
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { BrainCircuit, CalendarDays, ClipboardList, Clock, Hourglass, Loader2, Sparkles, CheckSquare } from 'lucide-react';
+import { BrainCircuit, CalendarDays, ClipboardList, Clock, Hourglass, Loader2, Sparkles, CheckSquare, AlertTriangle } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Form,
   FormControl,
@@ -58,6 +58,7 @@ export function TaskInputForm({ onSubmit, isLoading }: TaskInputFormProps): Reac
   const { watch, setValue, getValues } = form;
   const watchedTargetTimeUnit = watch('targetTimeUnit');
   const watchedTargetTime = watch('targetTime');
+  const watchedHoursPerDayCommitment = watch('hoursPerDayCommitment');
   
   const prevTargetTimeUnit = usePrevious(watchedTargetTimeUnit);
 
@@ -66,44 +67,34 @@ export function TaskInputForm({ onSubmit, isLoading }: TaskInputFormProps): Reac
   );
 
   React.useEffect(() => {
-    const currentTargetTime = getValues('targetTime');
-
-    if (watchedTargetTimeUnit === 'hours') {
-      // Entering 'hours' mode or targetTime changed within 'hours' mode
-      if (prevTargetTimeUnit !== 'hours' && prevTargetTimeUnit !== undefined) { 
-        // Store the current user-set daily commitment if we are just switching to 'hours'
-        const currentCommitment = getValues('hoursPerDayCommitment');
-        if (typeof currentCommitment === 'number' && !isNaN(currentCommitment)) {
-          setUserDefinedDailyCommitment(currentCommitment);
-        }
-      }
-      
-      let newDailyCommitment = 1; // Default to 1 hour
-      
-      // Proper type checking and validation for currentTargetTime
-      const targetTimeNum = typeof currentTargetTime === 'number' 
-        ? currentTargetTime 
-        : typeof currentTargetTime === 'string' 
-          ? parseFloat(currentTargetTime) 
-          : NaN;
-      
-      if (!isNaN(targetTimeNum) && targetTimeNum > 0 && isFinite(targetTimeNum)) {
-        // Ensure commitment is at least 1 and at most 24, and not more than the task itself if task is short
-        newDailyCommitment = Math.max(1, Math.min(Math.floor(targetTimeNum), 24));
-      }
-      
-      setValue('hoursPerDayCommitment', newDailyCommitment, { shouldValidate: true, shouldDirty: true });
-    } else {
-      // Entering 'days' or 'months' mode
-      if (prevTargetTimeUnit === 'hours') {
-        // Restore the previously user-defined commitment when switching away from 'hours'
-        setValue('hoursPerDayCommitment', userDefinedDailyCommitment, { shouldValidate: true, shouldDirty: true });
-      }
-      // If always in 'days'/'months' mode, hoursPerDayCommitment is user-controlled via the input field's onChange.
-    }
   }, [watchedTargetTimeUnit, watchedTargetTime, setValue, getValues, prevTargetTimeUnit, userDefinedDailyCommitment]);
 
-  const isDailyCommitmentDisabled = watchedTargetTimeUnit === 'hours';
+  // Calculate if the current inputs would exceed plan duration limits
+  const calculatePlanDuration = () => {
+    const targetTime = watchedTargetTime;
+    const targetTimeUnit = watchedTargetTimeUnit;
+    const hoursPerDay = watchedHoursPerDayCommitment;
+    
+    // Check for valid numeric values
+    if (!targetTime || !targetTimeUnit || !hoursPerDay || 
+        isNaN(targetTime) || isNaN(hoursPerDay) || 
+        targetTime <= 0 || hoursPerDay <= 0) {
+      return null;
+    }
+    
+    const totalHours = targetTimeUnit === 'days'
+        ? targetTime * hoursPerDay
+        : targetTime * 30 * hoursPerDay; // months to total hours
+    
+    const hoursPerWeek = hoursPerDay * 7;
+    const totalWeeks = Math.ceil(totalHours / hoursPerWeek);
+    
+    return { totalWeeks, totalHours, hoursPerWeek };
+  };
+  
+  const planDuration = calculatePlanDuration();
+  const isOverLimit = planDuration ? planDuration.totalWeeks > 52 : false;
+  const isNearLimit = planDuration ? planDuration.totalWeeks > 40 && planDuration.totalWeeks <= 52 : false;
 
   return (
     <Card className="w-full shadow-lg">
@@ -150,7 +141,18 @@ export function TaskInputForm({ onSubmit, isLoading }: TaskInputFormProps): Reac
                       Total Task Effort
                     </FormLabel>
                     <FormControl>
-                      <Input type="number" placeholder="e.g., 7" {...field} className="text-base" min="1"/>
+                      <Input 
+                        type="number" 
+                        placeholder="e.g., 7" 
+                        {...field} 
+                        value={field.value !== undefined ? String(field.value) : ''}
+                        className="text-base" 
+                        min="1"
+                        onChange={(e) => {
+                          const value = e.target.value === '' ? undefined : parseInt(e.target.value, 10);
+                          field.onChange(value);
+                        }}
+                      />
                     </FormControl>
                      <FormDescription>
                       Estimated total effort needed.
@@ -176,7 +178,6 @@ export function TaskInputForm({ onSubmit, isLoading }: TaskInputFormProps): Reac
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="hours">Hours</SelectItem>
                         <SelectItem value="days">Days</SelectItem>
                         <SelectItem value="months">Months</SelectItem>
                       </SelectContent>
@@ -202,14 +203,14 @@ export function TaskInputForm({ onSubmit, isLoading }: TaskInputFormProps): Reac
                       <Input 
                         type="number" 
                         placeholder="e.g., 2" 
-                        {...field} 
+                        {...field}
+                        value={field.value !== undefined ? String(field.value) : ''}
                         className="text-base"
-                        disabled={isDailyCommitmentDisabled}
                         min="1"
                         onChange={(e) => {
-                          const value = parseInt(e.target.value, 10);
+                          const value = e.target.value === '' ? undefined : parseInt(e.target.value, 10);
                           field.onChange(value); // Propagate change to RHF
-                          if (!isDailyCommitmentDisabled && !isNaN(value)) {
+                          if (value && !isNaN(value)) {
                             setUserDefinedDailyCommitment(value);
                           }
                         }}
@@ -217,7 +218,6 @@ export function TaskInputForm({ onSubmit, isLoading }: TaskInputFormProps): Reac
                     </FormControl>
                     <FormDescription>
                       Hours you'll dedicate per day. This determines your weekly time commitment (7 × daily hours).
-                      {isDailyCommitmentDisabled && " (Auto-set for 'hours' unit)"}
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -239,11 +239,56 @@ export function TaskInputForm({ onSubmit, isLoading }: TaskInputFormProps): Reac
                 />
             </FormItem>
             
-            <Button type="submit" disabled={isLoading} className="w-full text-lg py-6">
+            {isOverLimit && (
+              <Alert variant="destructive">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertDescription>
+                  <strong>Plan duration exceeds limits:</strong> Your current settings would create a {planDuration?.totalWeeks}-week plan, but the maximum is 52 weeks. 
+                  Try reducing the total task effort or increasing your daily commitment.
+                </AlertDescription>
+              </Alert>
+            )}
+            
+            {isNearLimit && !isOverLimit && (
+              <Alert>
+                <AlertTriangle className="h-4 w-4" />
+                <AlertDescription>
+                  <strong>Notice:</strong> Your plan will be {planDuration?.totalWeeks} weeks long. 
+                  Consider if this timeline works for your goals.
+                </AlertDescription>
+              </Alert>
+            )}
+            
+            {isNearLimit && !isOverLimit && (
+              <div className="rounded-md bg-yellow-50 p-4">
+                <div className="flex">
+                  <div className="flex-shrink-0">
+                    <svg className="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12.79V22H3V2h9.21M21 12.79L12.79 3M3 12.79L11.21 21" />
+                    </svg>
+                  </div>
+                  <div className="ml-3">
+                    <p className="text-sm font-medium text-yellow-800">
+                      Your plan is approaching the maximum duration limit of 52 weeks.
+                    </p>
+                    <p className="mt-1 text-sm text-yellow-600">
+                      Consider reviewing your task breakdown and commitments.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            <Button type="submit" disabled={isLoading || isOverLimit} className="w-full text-lg py-6">
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                   Breaking Down Task...
+                </>
+              ) : isOverLimit ? (
+                <>
+                  <AlertTriangle className="mr-2 h-5 w-5" />
+                  Plan Exceeds Limits - Adjust Settings
                 </>
               ) : (
                 <>

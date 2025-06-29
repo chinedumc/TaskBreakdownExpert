@@ -41,7 +41,7 @@ export function EmailExport({ onSubmitEmail, isExporting }: EmailExportProps): R
           Export Breakdown
         </CardTitle>
         <CardDescription>
-          Get your personalized task breakdown sent to your email as a PDF.
+          Get your personalized learning plan sent directly to your email inbox.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -60,7 +60,7 @@ export function EmailExport({ onSubmitEmail, isExporting }: EmailExportProps): R
                     <Input type="email" placeholder="you@example.com" {...field} className="text-base" />
                   </FormControl>
                   <FormDescription>
-                    We'll send the PDF to this email. (This is a simulated action)
+                    We'll send your complete learning plan with weekly breakdown to this email address.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -70,12 +70,12 @@ export function EmailExport({ onSubmitEmail, isExporting }: EmailExportProps): R
               {isExporting ? (
                 <>
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  Sending PDF...
+                  Sending Email...
                 </>
               ) : (
                 <>
                   <Mail className="mr-2 h-5 w-5" />
-                  Send PDF to Email
+                  Send Learning Plan to Email
                 </>
               )}
             </Button>

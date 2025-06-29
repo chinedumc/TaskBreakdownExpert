@@ -116,10 +116,21 @@ const Home: NextPage = () => {
     } catch (error) {
       console.error("Error processing task:", error);
       const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred.";
-      setAiError(`Failed to generate task breakdown: ${errorMessage}. Please try again.`);
+      
+      // Provide more specific guidance based on the error type
+      let userFriendlyMessage = errorMessage;
+      if (errorMessage.includes("too long for a single generation")) {
+        userFriendlyMessage = `${errorMessage}\n\nTip: Try reducing your target time, or increase your daily hours commitment to complete the goal faster.`;
+      } else if (errorMessage.includes("JSON") || errorMessage.includes("parse")) {
+        userFriendlyMessage = "AI response formatting error. Please try again - this is usually temporary.";
+      } else if (errorMessage.includes("token") || errorMessage.includes("limit")) {
+        userFriendlyMessage = "Your request is too complex for the AI to process. Please try breaking it into smaller goals or reducing the time frame.";
+      }
+      
+      setAiError(userFriendlyMessage);
       toast({
         title: "Error",
-        description: `Failed to generate task breakdown. ${errorMessage}`,
+        description: userFriendlyMessage,
         variant: "destructive",
       });
     } finally {
@@ -131,15 +142,63 @@ const Home: NextPage = () => {
     await logger.logUserAction('Email Export Request', values);
     setIsSubmittingEmail(true);
     setAiError(null);
-    console.log("Simulating email export to:", values.email);
-    await new Promise(resolve => setTimeout(resolve, 1500));
     
-    toast({
-      title: "Email Sent (Simulated)",
-      description: `Task breakdown would be sent to ${values.email}.`,
-      variant: "default",
-    });
-    setIsSubmittingEmail(false);
+    try {
+      if (!taskBreakdownResult) {
+        throw new Error('No task breakdown available to send');
+      }
+
+      const response = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: values.email,
+          taskBreakdown: {
+            task: taskBreakdownResult.breakdown.length > 0 ? 
+              `Learning plan with ${taskBreakdownResult.breakdown.length} weeks` : 
+              'Your learning plan',
+            breakdown: taskBreakdownResult.breakdown,
+            summary: taskSummary || undefined
+          }
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to send email');
+      }
+
+      toast({
+        title: "Email Sent Successfully! 📧",
+        description: `Your personalized learning plan has been sent to ${values.email}.`,
+        variant: "default",
+      });
+      
+      await logger.logUserAction('Email Export Success', { 
+        email: values.email, 
+        messageId: result.messageId 
+      });
+      
+    } catch (error) {
+      console.error('Failed to send email:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      
+      toast({
+        title: "Email Failed to Send",
+        description: `Failed to send email: ${errorMessage}. Please try again.`,
+        variant: "destructive",
+      });
+      
+      await logger.logUserAction('Email Export Error', { 
+        email: values.email, 
+        error: errorMessage 
+      });
+    } finally {
+      setIsSubmittingEmail(false);
+    }
   };
 
   return (
@@ -169,7 +228,7 @@ const Home: NextPage = () => {
              <Alert variant="destructive" className="shadow-md">
               <Terminal className="h-4 w-4" />
               <AlertTitle>AI Processing Error</AlertTitle>
-              <AlertDescription>{aiError}</AlertDescription>
+              <AlertDescription className="whitespace-pre-line">{aiError}</AlertDescription>
             </Alert>
           )}
 

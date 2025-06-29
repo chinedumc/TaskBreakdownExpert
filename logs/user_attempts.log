@@ -655,3 +655,251 @@ Response: {
     }
   ]
 }
+[2025-06-29T13:52:00.784Z] USER_ACTION: Action: Task Breakdown Request
+Details: {
+  "task": "flutter mobile development",
+  "targetTime": 8,
+  "targetTimeUnit": "months",
+  "hoursPerDayCommitment": 6,
+  "calculatedTotalWeeks": 35,
+  "totalHours": 1440,
+  "hoursPerWeek": 42
+}
+[2025-06-29T13:52:31.160Z] ERROR: Context: Task Breakdown
+Error: Failed to parse OpenAI response: SyntaxError: Unterminated string in JSON at position 18646 (line 278 column 97)
+Stack: Error: Failed to parse OpenAI response: SyntaxError: Unterminated string in JSON at position 18646 (line 278 column 97)
+    at oi (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/.next/server/app/page.js:121:506)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async /Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:128:1499
+    at async tL (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:127:14308)
+    at async r0 (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:133:16292)
+    at async doRender (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/server/base-server.js:1650:34)
+    at async NextNodeServer.renderToResponseWithComponentsImpl (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/server/base-server.js:1915:28)
+    at async NextNodeServer.renderPageComponent (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/server/base-server.js:2393:24)
+    at async NextNodeServer.renderToResponseImpl (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/server/base-server.js:2430:32)
+    at async NextNodeServer.pipeImpl (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/server/base-server.js:1003:25)
+[2025-06-29T14:01:07.498Z] USER_ACTION: Action: Task Breakdown Request
+Details: {
+  "task": "flutter mobile development",
+  "targetTime": 9,
+  "targetTimeUnit": "months",
+  "hoursPerDayCommitment": 8,
+  "calculatedTotalWeeks": 39,
+  "totalHours": 2160,
+  "hoursPerWeek": 56
+}
+[2025-06-29T14:01:38.321Z] ERROR: Context: Task Breakdown
+Error: Failed to parse OpenAI response: Error: Failed to parse JSON even after cleaning: SyntaxError: Expected ',' or ']' after array element in JSON at position 16401 (line 1 column 16402)
+Stack: Error: Failed to parse OpenAI response: Error: Failed to parse JSON even after cleaning: SyntaxError: Expected ',' or ']' after array element in JSON at position 16401 (line 1 column 16402)
+    at oi (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/.next/server/app/page.js:135:1376)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async /Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:128:1499
+    at async tL (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:127:14308)
+    at async r0 (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:133:16292)
+    at async doRender (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/server/base-server.js:1650:34)
+    at async NextNodeServer.renderToResponseWithComponentsImpl (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/server/base-server.js:1915:28)
+    at async NextNodeServer.renderPageComponent (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/server/base-server.js:2393:24)
+    at async NextNodeServer.renderToResponseImpl (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/server/base-server.js:2430:32)
+    at async NextNodeServer.pipeImpl (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/server/base-server.js:1003:25)
+[2025-06-29T14:07:51.993Z] USER_ACTION: Action: Task Breakdown Request
+Details: {
+  "task": "I want to learn C++",
+  "targetTime": 9,
+  "targetTimeUnit": "months",
+  "hoursPerDayCommitment": 5,
+  "calculatedTotalWeeks": 39,
+  "totalHours": 1350,
+  "hoursPerWeek": 35
+}
+[2025-06-29T14:08:31.707Z] ERROR: Context: Task Breakdown
+Error: Failed to parse OpenAI response: Error: Complete JSON parsing failure: Error: Could not extract any valid week objects from response
+Stack: Error: Failed to parse OpenAI response: Error: Complete JSON parsing failure: Error: Could not extract any valid week objects from response
+    at oo (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/.next/server/app/page.js:135:2028)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async oa (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/.next/server/app/page.js:135:2729)
+    at async oi (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/.next/server/app/page.js:14:62794)
+    at async /Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:128:1499
+    at async tL (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:127:14308)
+    at async r0 (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:133:16292)
+    at async doRender (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/server/base-server.js:1650:34)
+    at async NextNodeServer.renderToResponseWithComponentsImpl (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/server/base-server.js:1915:28)
+    at async NextNodeServer.renderPageComponent (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/server/base-server.js:2393:24)
+[2025-06-29T14:30:25.751Z] USER_ACTION: Action: Task Breakdown Request
+Details: {
+  "task": "I want to learn C++",
+  "targetTime": 9,
+  "targetTimeUnit": "months",
+  "hoursPerDayCommitment": 5,
+  "calculatedTotalWeeks": 39,
+  "totalHours": 1350,
+  "hoursPerWeek": 35
+}
+[2025-06-29T14:30:25.753Z] ERROR: Context: Task Breakdown
+Error: Plan duration of 39 weeks is too long for a single generation. Please reduce target time to 6 months maximum or increase daily commitment hours.
+Stack: Error: Plan duration of 39 weeks is too long for a single generation. Please reduce target time to 6 months maximum or increase daily commitment hours.
+    at oo (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/.next/server/app/page.js:14:63852)
+    at /Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:128:1541
+    at AsyncLocalStorage.run (node:internal/async_local_storage/async_hooks:91:14)
+    at /Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:128:1529
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async tL (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:127:14308)
+    at async r0 (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:133:16292)
+    at async doRender (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/server/base-server.js:1650:34)
+    at async NextNodeServer.renderToResponseWithComponentsImpl (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/server/base-server.js:1915:28)
+    at async NextNodeServer.renderPageComponent (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/server/base-server.js:2393:24)
+[2025-06-29T14:42:00.957Z] USER_ACTION: Action: Task Breakdown Request
+Details: {
+  "task": "I want to learn C++",
+  "targetTime": 9,
+  "targetTimeUnit": "months",
+  "hoursPerDayCommitment": 6,
+  "calculatedTotalWeeks": 39,
+  "totalHours": 1620,
+  "hoursPerWeek": 42
+}
+[2025-06-29T14:45:04.867Z] USER_ACTION: Action: Task Breakdown Request
+Details: {
+  "task": "Agile Scrum",
+  "targetTime": 9,
+  "targetTimeUnit": "months",
+  "hoursPerDayCommitment": 6,
+  "calculatedTotalWeeks": 39,
+  "totalHours": 1620,
+  "hoursPerWeek": 42
+}
+[2025-06-29T14:50:21.857Z] USER_ACTION: Action: Task Breakdown Request
+Details: {
+  "task": "Agile Scrum",
+  "targetTime": 3,
+  "targetTimeUnit": "hours",
+  "hoursPerDayCommitment": 3,
+  "calculatedTotalWeeks": 1,
+  "totalHours": 3,
+  "hoursPerWeek": 21
+}
+[2025-06-29T14:50:24.164Z] ERROR: Context: Task Breakdown
+Error: Failed to parse OpenAI response: Error: Complete JSON parsing failure: Error: Could not extract any valid week objects from response
+Stack: Error: Failed to parse OpenAI response: Error: Complete JSON parsing failure: Error: Could not extract any valid week objects from response
+    at oa (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/.next/server/app/page.js:135:671)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async oo (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/.next/server/app/page.js:14:64210)
+    at async /Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:128:1499
+    at async tL (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:127:14308)
+    at async r0 (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:133:16292)
+    at async doRender (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/server/base-server.js:1650:34)
+    at async NextNodeServer.renderToResponseWithComponentsImpl (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/server/base-server.js:1915:28)
+    at async NextNodeServer.renderPageComponent (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/server/base-server.js:2393:24)
+    at async NextNodeServer.renderToResponseImpl (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/server/base-server.js:2430:32)
+[2025-06-29T15:04:57.558Z] USER_ACTION: Action: Task Breakdown Request
+Details: {
+  "task": "I want to learn C++ and build projects. Suggest likely projects for each milestone stage.",
+  "targetTime": 9,
+  "targetTimeUnit": "months",
+  "hoursPerDayCommitment": 7,
+  "calculatedTotalWeeks": 39,
+  "totalHours": 1890,
+  "hoursPerWeek": 49
+}
+[2025-06-29T15:43:50.704Z] USER_ACTION: Action: Task Breakdown Request
+Details: {
+  "task": "I want to learn futter for mobile development and build projects. Suggest likely projects for each milestone stage.",
+  "targetTime": 7,
+  "targetTimeUnit": "months",
+  "hoursPerDayCommitment": 3,
+  "calculatedTotalWeeks": 30,
+  "totalHours": 630,
+  "hoursPerWeek": 21
+}
+[2025-06-29T15:53:16.515Z] USER_ACTION: Action: Task Breakdown Request
+Details: {
+  "task": "to make pancakes at home",
+  "targetTime": 7,
+  "targetTimeUnit": "days",
+  "hoursPerDayCommitment": 2,
+  "calculatedTotalWeeks": 1,
+  "totalHours": 14,
+  "hoursPerWeek": 14
+}
+[2025-06-29T15:53:20.213Z] ERROR: Context: Task Breakdown
+Error: Failed to parse OpenAI response: Error: Complete JSON parsing failure: Error: Could not extract any valid week objects from response
+Stack: Error: Failed to parse OpenAI response: Error: Complete JSON parsing failure: Error: Could not extract any valid week objects from response
+    at generateSingleBreakdown (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/.next/server/chunks/ssr/[root of the server]__795a3a99._.js:421:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async taskBreakdown (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/.next/server/chunks/ssr/[root of the server]__795a3a99._.js:255:20)
+    at async /Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:438:2357
+    at async handleAction (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:437:23434)
+    at async renderToHTMLOrFlightImpl (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:443:26714)
+    at async doRender (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/server/base-server.js:1650:34)
+    at async DevServer.renderToResponseWithComponentsImpl (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/server/base-server.js:1915:28)
+    at async DevServer.renderPageComponent (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/server/base-server.js:2393:24)
+    at async DevServer.renderToResponseImpl (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/server/base-server.js:2430:32)
+    at async DevServer.pipeImpl (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/server/base-server.js:1003:25)
+    at async NextNodeServer.handleCatchallRenderRequest (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/server/next-server.js:304:17)
+    at async DevServer.handleRequestImpl (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/server/base-server.js:895:17)
+    at async /Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/server/dev/next-dev-server.js:371:20
+    at async Span.traceAsyncFn (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/trace/trace.js:157:20)
+    at async DevServer.handleRequest (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/server/dev/next-dev-server.js:368:24)
+    at async invokeRender (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/server/lib/router-server.js:247:21)
+    at async handleRequest (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/server/lib/router-server.js:438:24)
+    at async requestHandlerImpl (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/server/lib/router-server.js:462:13)
+    at async Server.requestListener (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/server/lib/start-server.js:158:13)
+[2025-06-29T16:23:39.969Z] USER_ACTION: Action: Task Breakdown Request
+Details: {
+  "task": "I want to learn futter for mobile development and build projects. Suggest likely projects for each milestone stage.",
+  "targetTime": 7,
+  "targetTimeUnit": "days",
+  "hoursPerDayCommitment": 4,
+  "calculatedTotalWeeks": 1,
+  "totalHours": 28,
+  "hoursPerWeek": 28
+}
+[2025-06-29T16:23:42.862Z] OPENAI_RESPONSE: Context: Task Breakdown
+Response: {
+  "breakdown": [
+    {
+      "unit": "Week 1 (28 hours total - 4 hours/day)",
+      "tasks": [
+        "WEEKLY GOAL: By end of week, you will have a foundational understanding of Flutter for mobile development and be able to build basic projects",
+        "Day-by-day breakdown:",
+        "• Monday (4h): Install Flutter SDK, set up IDE (e.g., Android Studio with Flutter plugin)",
+        "• Tuesday (4h): Explore Flutter documentation to understand widgets and layouts",
+        "• Wednesday (4h): Practice creating a simple UI with Flutter widgets",
+        "• Thursday (4h): Learn state management in Flutter and implement basic stateful widgets",
+        "• Friday (4h): Build a basic Flutter project (e.g., a To-Do list app) to apply learned concepts",
+        "• Saturday (4h): Enhance the project by adding interactivity and styling",
+        "• Sunday (4h): Test the project on an emulator or physical device, debug any issues",
+        "WEEK END MILESTONE: Complete a functional To-Do list app using Flutter with basic UI, state management, and interactivity"
+      ]
+    }
+  ]
+}
+[2025-06-29T16:24:08.187Z] USER_ACTION: Action: Task Breakdown Request
+Details: {
+  "task": "I want to learn futter for mobile development and build projects. Suggest likely projects for each milestone stage.",
+  "targetTime": 8,
+  "targetTimeUnit": "months",
+  "hoursPerDayCommitment": 4,
+  "calculatedTotalWeeks": 35,
+  "totalHours": 960,
+  "hoursPerWeek": 28
+}
+[2025-06-29T16:25:56.929Z] USER_ACTION: Action: Task Breakdown Request
+Details: {
+  "task": "I want to learn futter for mobile development and build projects. Suggest likely projects for each milestone stage.",
+  "targetTime": 3,
+  "targetTimeUnit": "months",
+  "hoursPerDayCommitment": 4,
+  "calculatedTotalWeeks": 13,
+  "totalHours": 360,
+  "hoursPerWeek": 28
+}
+[2025-06-29T16:28:34.276Z] USER_ACTION: Action: Task Breakdown Request
+Details: {
+  "task": "I want to learn futter for mobile development and build projects. Suggest likely projects for each milestone stage.",
+  "targetTime": 3,
+  "targetTimeUnit": "months",
+  "hoursPerDayCommitment": 2,
+  "calculatedTotalWeeks": 13,
+  "totalHours": 180,
+  "hoursPerWeek": 14
+}
