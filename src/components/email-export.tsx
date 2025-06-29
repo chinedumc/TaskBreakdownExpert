@@ -41,7 +41,7 @@ export function EmailExport({ onSubmitEmail, isExporting }: EmailExportProps): R
           Export Breakdown
         </CardTitle>
         <CardDescription>
-          Get your personalized learning plan sent directly to your email inbox.
+          Email export is temporarily disabled. Please use the download option to save your learning plan.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -57,27 +57,24 @@ export function EmailExport({ onSubmitEmail, isExporting }: EmailExportProps): R
                     Your Email Address
                   </FormLabel>
                   <FormControl>
-                    <Input type="email" placeholder="you@example.com" {...field} className="text-base" />
+                    <Input 
+                      type="email" 
+                      placeholder="Email feature temporarily disabled" 
+                      {...field} 
+                      className="text-base bg-gray-100 text-gray-500 cursor-not-allowed" 
+                      disabled={true}
+                    />
                   </FormControl>
                   <FormDescription>
-                    We'll send your complete learning plan with weekly breakdown to this email address.
+                    Email functionality is temporarily disabled. Please use the download option below to save your learning plan.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button type="submit" disabled={isExporting} className="w-full text-lg py-6">
-              {isExporting ? (
-                <>
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  Sending Email...
-                </>
-              ) : (
-                <>
-                  <Mail className="mr-2 h-5 w-5" />
-                  Send Learning Plan to Email
-                </>
-              )}
+            <Button type="submit" disabled={true} className="w-full text-lg py-6 opacity-50 cursor-not-allowed">
+              <Mail className="mr-2 h-5 w-5" />
+              Email Feature Temporarily Disabled
             </Button>
           </form>
         </Form>

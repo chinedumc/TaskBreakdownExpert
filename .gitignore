@@ -40,6 +40,10 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# logs - now configurable via LOG_PATH environment variable
+logs/
+*.log
+
 .genkit/*
 .env*
 

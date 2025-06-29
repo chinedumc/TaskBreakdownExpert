@@ -11,7 +11,9 @@
 
 import { ai, DEFAULT_MODEL } from '@/ai/openai';
 import { ServerLogger } from '@/utils/logger';
+import { AnalyticsLogger } from '@/utils/analytics-logger';
 const serverLogger = new ServerLogger();
+const analyticsLogger = new AnalyticsLogger();
 import { z } from 'zod';
 
 const TaskBreakdownInputSchema = z.object({
@@ -221,11 +223,17 @@ export async function taskBreakdown(values: TaskBreakdownInput): Promise<TaskBre
     console.log(`Generating ${totalWeeks} weeks for ${values.targetTime} ${values.targetTimeUnit} at ${values.hoursPerDayCommitment} hours/day (${hoursPerWeek} hours/week)`);
 
     // For larger requests (>12 weeks), use chunked approach for better reliability
+    let result;
     if (totalWeeks > 12) {
-      return await generateChunkedBreakdown(values, totalWeeks, hoursPerWeek);
+      result = await generateChunkedBreakdown(values, totalWeeks, hoursPerWeek);
     } else {
-      return await generateSingleBreakdown(values, totalWeeks, hoursPerWeek);
+      result = await generateSingleBreakdown(values, totalWeeks, hoursPerWeek);
     }
+
+    // Track successful task breakdown generation
+    analyticsLogger.incrementTaskBreakdowns(values.task);
+    
+    return result;
   } catch (error) {
     await serverLogger.logError(error as Error, 'Task Breakdown');
     throw error;

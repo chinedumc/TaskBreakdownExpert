@@ -1,8 +1,10 @@
 import { Resend } from 'resend';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { AnalyticsLogger } from '@/utils/analytics-logger';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
+const analyticsLogger = new AnalyticsLogger();
 
 const EmailRequestSchema = z.object({
   email: z.string().email(),
@@ -37,6 +39,9 @@ export async function POST(request: NextRequest) {
       console.error('Email sending failed:', error);
       return NextResponse.json({ error: 'Failed to send email' }, { status: 500 });
     }
+
+    // Track successful email send
+    analyticsLogger.incrementEmailsSent();
 
     return NextResponse.json({ success: true, messageId: data?.id });
   } catch (error) {

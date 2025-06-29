@@ -23,6 +23,21 @@ export function DownloadBreakdown({ breakdown }: DownloadBreakdownProps): React.
     return null;
   }
 
+  const trackDownload = async (downloadType: 'pdf' | 'text') => {
+    try {
+      await fetch('/api/track-download', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ downloadType }),
+      });
+    } catch (error) {
+      console.error('Failed to track download:', error);
+      // Don't block the download if tracking fails
+    }
+  };
+
   const generatePDF = async () => {
     try {
       setIsLoading(true);
@@ -105,6 +120,9 @@ export function DownloadBreakdown({ breakdown }: DownloadBreakdownProps): React.
         title: 'PDF Downloaded',
         description: 'Your task breakdown has been saved as a PDF.',
       });
+
+      // Track the download
+      await trackDownload('pdf');
     } catch (error) {
       console.error('Error generating PDF:', error);
       toast({
@@ -151,13 +169,9 @@ export function DownloadBreakdown({ breakdown }: DownloadBreakdownProps): React.
       title: 'Text Downloaded',
       description: 'Your task breakdown has been saved as a text file.',
     });
-    URL.revokeObjectURL(url); // Clean up
-
-    toast({
-      title: "Download Started",
-      description: `${filename} is being downloaded.`,
-      variant: "default",
-    });
+    
+    // Track the download
+    trackDownload('text');
   };
 
   return (
