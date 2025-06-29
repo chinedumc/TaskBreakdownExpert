@@ -37,7 +37,7 @@ const formDefaultValues: TaskBreakdownFormValues = {
   task: '',
   targetTime: 7,
   targetTimeUnit: 'days',
-  planGranularity: 'daily',
+  planGranularity: 'weekly',
   hoursPerDayCommitment: 2,
 };
 
@@ -66,20 +66,32 @@ export function TaskInputForm({ onSubmit, isLoading }: TaskInputFormProps): Reac
   );
 
   React.useEffect(() => {
-    const currentTargetTime = getValues('targetTime'); // Already coerced by Zod if valid
+    const currentTargetTime = getValues('targetTime');
 
     if (watchedTargetTimeUnit === 'hours') {
       // Entering 'hours' mode or targetTime changed within 'hours' mode
       if (prevTargetTimeUnit !== 'hours' && prevTargetTimeUnit !== undefined) { 
         // Store the current user-set daily commitment if we are just switching to 'hours'
-        setUserDefinedDailyCommitment(getValues('hoursPerDayCommitment'));
+        const currentCommitment = getValues('hoursPerDayCommitment');
+        if (typeof currentCommitment === 'number' && !isNaN(currentCommitment)) {
+          setUserDefinedDailyCommitment(currentCommitment);
+        }
       }
       
       let newDailyCommitment = 1; // Default to 1 hour
-      if (typeof currentTargetTime === 'number' && !isNaN(currentTargetTime) && currentTargetTime > 0) {
+      
+      // Proper type checking and validation for currentTargetTime
+      const targetTimeNum = typeof currentTargetTime === 'number' 
+        ? currentTargetTime 
+        : typeof currentTargetTime === 'string' 
+          ? parseFloat(currentTargetTime) 
+          : NaN;
+      
+      if (!isNaN(targetTimeNum) && targetTimeNum > 0 && isFinite(targetTimeNum)) {
         // Ensure commitment is at least 1 and at most 24, and not more than the task itself if task is short
-        newDailyCommitment = Math.max(1, Math.min(currentTargetTime, 24));
+        newDailyCommitment = Math.max(1, Math.min(Math.floor(targetTimeNum), 24));
       }
+      
       setValue('hoursPerDayCommitment', newDailyCommitment, { shouldValidate: true, shouldDirty: true });
     } else {
       // Entering 'days' or 'months' mode
@@ -101,7 +113,7 @@ export function TaskInputForm({ onSubmit, isLoading }: TaskInputFormProps): Reac
           Describe Your Goal
         </CardTitle>
         <CardDescription>
-          Let our AI expert help you break down your goal into manageable daily steps based on your commitment.
+          Let our AI expert help you break down your goal into a detailed weekly plan with daily tasks based on your commitment.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -120,7 +132,7 @@ export function TaskInputForm({ onSubmit, isLoading }: TaskInputFormProps): Reac
                     <Input placeholder="e.g., Learn Next.js and build projects each step of the way" {...field} className="text-base"/>
                   </FormControl>
                   <FormDescription>
-                    What do you want to achieve? Be specific for better results.
+                    What do you want to achieve? Be specific for better weekly planning results.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -204,7 +216,7 @@ export function TaskInputForm({ onSubmit, isLoading }: TaskInputFormProps): Reac
                       />
                     </FormControl>
                     <FormDescription>
-                      Hours you'll dedicate per day.
+                      Hours you'll dedicate per day. This determines your weekly time commitment (7 × daily hours).
                       {isDailyCommitmentDisabled && " (Auto-set for 'hours' unit)"}
                     </FormDescription>
                     <FormMessage />
@@ -218,7 +230,7 @@ export function TaskInputForm({ onSubmit, isLoading }: TaskInputFormProps): Reac
                     Plan Structure
                 </FormLabel>
                 <p className="text-sm text-muted-foreground pt-1">
-                    Your tasks will be broken down into a <span className="font-semibold text-foreground">daily plan</span>.
+                    Your tasks will be broken down into a <span className="font-semibold text-foreground">weekly plan</span>.
                 </p>
                 <FormField
                     control={form.control}
@@ -236,7 +248,7 @@ export function TaskInputForm({ onSubmit, isLoading }: TaskInputFormProps): Reac
               ) : (
                 <>
                   <Sparkles className="mr-2 h-5 w-5" />
-                  Generate Detailed Daily Plan
+                  Generate Detailed Weekly Plan
                 </>
               )}
             </Button>

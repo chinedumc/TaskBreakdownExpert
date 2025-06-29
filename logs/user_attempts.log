@@ -1,0 +1,657 @@
+[2025-06-29T11:27:35.818Z] USER_ACTION: Action: Task Breakdown Request
+Details: {
+  "task": "flutter mobile development",
+  "targetTime": 7,
+  "targetTimeUnit": "months",
+  "hoursPerDayCommitment": 2
+}
+[2025-06-29T11:27:37.933Z] ERROR: Context: Task Breakdown
+Error: [
+  {
+    "code": "invalid_type",
+    "expected": "array",
+    "received": "undefined",
+    "path": [
+      "breakdown"
+    ],
+    "message": "Required"
+  }
+]
+Stack: ZodError: [
+  {
+    "code": "invalid_type",
+    "expected": "array",
+    "received": "undefined",
+    "path": [
+      "breakdown"
+    ],
+    "message": "Required"
+  }
+]
+    at get error (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/.next/server/app/page.js:14:9129)
+    at n7.parse (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/.next/server/app/page.js:14:10403)
+    at oo (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/.next/server/app/page.js:17:282)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async /Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:128:1499
+    at async tL (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:127:14308)
+    at async r0 (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:133:16292)
+    at async doRender (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/server/base-server.js:1650:34)
+    at async NextNodeServer.renderToResponseWithComponentsImpl (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/server/base-server.js:1915:28)
+    at async NextNodeServer.renderPageComponent (/Users/chinedumchiboka/Documents/projects/TaskBreakdownExpert/node_modules/next/dist/server/base-server.js:2393:24)
+[2025-06-29T11:32:35.025Z] USER_ACTION: Action: Task Breakdown Request
+Details: {
+  "task": "flutter mobile development",
+  "targetTime": 7,
+  "targetTimeUnit": "months",
+  "hoursPerDayCommitment": 2
+}
+[2025-06-29T11:32:50.074Z] OPENAI_RESPONSE: Context: Task Breakdown
+Response: {
+  "breakdown": [
+    {
+      "unit": "Day 1 (2 hours focus)",
+      "tasks": [
+        "Set up Flutter development environment",
+        "Complete Flutter beginner tutorial"
+      ]
+    },
+    {
+      "unit": "Day 2 (2 hours focus)",
+      "tasks": [
+        "Build a simple Flutter UI layout",
+        "Learn about Flutter widgets"
+      ]
+    },
+    {
+      "unit": "Day 3 (2 hours focus)",
+      "tasks": [
+        "Implement state management in Flutter",
+        "Explore Flutter navigation options"
+      ]
+    },
+    {
+      "unit": "Day 4 (2 hours focus)",
+      "tasks": [
+        "Work on integrating APIs in Flutter app",
+        "Practice debugging in Flutter"
+      ]
+    },
+    {
+      "unit": "Day 5 (2 hours focus)",
+      "tasks": [
+        "Create custom animations in Flutter",
+        "Optimize Flutter app performance"
+      ]
+    },
+    {
+      "unit": "Day 6 (2 hours focus)",
+      "tasks": [
+        "Implement authentication in Flutter app",
+        "Research best practices in Flutter development"
+      ]
+    },
+    {
+      "unit": "Day 7 (2 hours focus)",
+      "tasks": [
+        "Build a project using Firebase integration",
+        "Review and refactor Flutter code"
+      ]
+    },
+    {
+      "unit": "Day 8 (2 hours focus)",
+      "tasks": [
+        "Learn about Flutter testing techniques",
+        "Work on improving Flutter app UI/UX"
+      ]
+    },
+    {
+      "unit": "Day 9 (2 hours focus)",
+      "tasks": [
+        "Implement push notifications in Flutter app",
+        "Explore state management libraries in Flutter"
+      ]
+    },
+    {
+      "unit": "Day 10 (2 hours focus)",
+      "tasks": [
+        "Optimize Flutter app for different screen sizes",
+        "Practice using Flutter plugins"
+      ]
+    },
+    {
+      "unit": "Day 11 (2 hours focus)",
+      "tasks": [
+        "Work on adding offline support to Flutter app",
+        "Research advanced Flutter topics"
+      ]
+    },
+    {
+      "unit": "Day 12 (2 hours focus)",
+      "tasks": [
+        "Create custom platform channels in Flutter",
+        "Review and optimize Flutter app architecture"
+      ]
+    },
+    {
+      "unit": "Day 13 (2 hours focus)",
+      "tasks": [
+        "Implement internationalization in Flutter app",
+        "Explore Flutter web support"
+      ]
+    },
+    {
+      "unit": "Day 14 (2 hours focus)",
+      "tasks": [
+        "Build a responsive Flutter app layout",
+        "Practice using Flutter packages"
+      ]
+    },
+    {
+      "unit": "Day 15 (2 hours focus)",
+      "tasks": [
+        "Work on integrating maps in Flutter app",
+        "Research Flutter performance optimization"
+      ]
+    },
+    {
+      "unit": "Day 16 (2 hours focus)",
+      "tasks": [
+        "Implement dark mode in Flutter app",
+        "Review and refactor Flutter code"
+      ]
+    },
+    {
+      "unit": "Day 17 (2 hours focus)",
+      "tasks": [
+        "Learn about Flutter desktop support",
+        "Work on adding unit tests to Flutter app"
+      ]
+    },
+    {
+      "unit": "Day 18 (2 hours focus)",
+      "tasks": [
+        "Explore advanced state management in Flutter",
+        "Practice using Flutter animations"
+      ]
+    },
+    {
+      "unit": "Day 19 (2 hours focus)",
+      "tasks": [
+        "Implement GraphQL API integration in Flutter app",
+        "Optimize network requests in Flutter"
+      ]
+    },
+    {
+      "unit": "Day 20 (2 hours focus)",
+      "tasks": [
+        "Build a portfolio project in Flutter",
+        "Review and optimize Flutter app performance"
+      ]
+    },
+    {
+      "unit": "Day 21 (2 hours focus)",
+      "tasks": [
+        "Work on improving Flutter app accessibility",
+        "Research Flutter CI/CD pipelines"
+      ]
+    },
+    {
+      "unit": "Day 22 (2 hours focus)",
+      "tasks": [
+        "Implement automated testing in Flutter app",
+        "Practice using Flutter form validation"
+      ]
+    },
+    {
+      "unit": "Day 23 (2 hours focus)",
+      "tasks": [
+        "Explore Flutter plugin development",
+        "Optimize app storage in Flutter"
+      ]
+    },
+    {
+      "unit": "Day 24 (2 hours focus)",
+      "tasks": [
+        "Create a Flutter package for reusable components",
+        "Review and refactor Flutter code"
+      ]
+    },
+    {
+      "unit": "Day 25 (2 hours focus)",
+      "tasks": [
+        "Learn about Flutter CI/CD with GitHub Actions",
+        "Work on Flutter app deployment strategies"
+      ]
+    },
+    {
+      "unit": "Day 26 (2 hours focus)",
+      "tasks": [
+        "Implement user analytics in Flutter app",
+        "Explore Flutter state restoration"
+      ]
+    },
+    {
+      "unit": "Day 27 (2 hours focus)",
+      "tasks": [
+        "Build a chat application using Flutter",
+        "Practice using Firebase Cloud Messaging"
+      ]
+    },
+    {
+      "unit": "Day 28 (2 hours focus)",
+      "tasks": [
+        "Work on integrating video playback in Flutter app",
+        "Research Flutter best practices"
+      ]
+    },
+    {
+      "unit": "Day 29 (2 hours focus)",
+      "tasks": [
+        "Implement biometric authentication in Flutter app",
+        "Optimize Flutter app build size"
+      ]
+    },
+    {
+      "unit": "Day 30 (2 hours focus)",
+      "tasks": [
+        "Create a Flutter app with offline sync capabilities",
+        "Review and optimize Flutter app architecture"
+      ]
+    }
+  ]
+}
+[2025-06-29T12:09:10.756Z] USER_ACTION: Action: Task Breakdown Request
+Details: {
+  "task": "flutter mobile development",
+  "targetTime": 7,
+  "targetTimeUnit": "months",
+  "hoursPerDayCommitment": 1
+}
+[2025-06-29T12:09:22.221Z] OPENAI_RESPONSE: Context: Task Breakdown
+Response: {
+  "breakdown": [
+    {
+      "unit": "Day 1 (1 hours focus)",
+      "tasks": [
+        "Set up Flutter development environment",
+        "Create a new Flutter project",
+        "Explore basic Flutter widgets"
+      ]
+    },
+    {
+      "unit": "Day 2 (1 hours focus)",
+      "tasks": [
+        "Learn about state management in Flutter",
+        "Implement a simple stateful widget",
+        "Create a basic layout using rows and columns"
+      ]
+    },
+    {
+      "unit": "Day 3 (1 hours focus)",
+      "tasks": [
+        "Understand Flutter navigation",
+        "Implement a simple navigation between screens",
+        "Explore Flutter packages and plugins"
+      ]
+    },
+    {
+      "unit": "Day 4 (1 hours focus)",
+      "tasks": [
+        "Work on styling and theming in Flutter",
+        "Implement custom themes in your project",
+        "Learn about responsive design in Flutter"
+      ]
+    },
+    {
+      "unit": "Day 5 (1 hours focus)",
+      "tasks": [
+        "Dive into networking and API integration in Flutter",
+        "Make API calls using packages like http",
+        "Parse JSON data and display it in your app"
+      ]
+    },
+    {
+      "unit": "Day 6 (1 hours focus)",
+      "tasks": [
+        "Explore more advanced state management options in Flutter",
+        "Implement provider for state management",
+        "Work on more complex UI designs"
+      ]
+    },
+    {
+      "unit": "Day 7 (1 hours focus)",
+      "tasks": [
+        "Optimize your Flutter app for performance",
+        "Implement lazy loading techniques",
+        "Practice debugging and troubleshooting in Flutter"
+      ]
+    },
+    {
+      "unit": "Day 8 (1 hours focus)",
+      "tasks": [
+        "Learn about animations in Flutter",
+        "Implement basic animations in your app",
+        "Explore animation controllers and tweens"
+      ]
+    },
+    {
+      "unit": "Day 9 (1 hours focus)",
+      "tasks": [
+        "Work on integrating Firebase services in your Flutter app",
+        "Set up Firebase project and configure necessary services",
+        "Implement Firebase authentication"
+      ]
+    },
+    {
+      "unit": "Day 10 (1 hours focus)",
+      "tasks": [
+        "Practice testing in Flutter",
+        "Write unit tests for your Flutter widgets",
+        "Explore widget testing and integration testing in Flutter"
+      ]
+    },
+    {
+      "unit": "Day 11 (1 hours focus)",
+      "tasks": [
+        "Implement local storage in Flutter app",
+        "Use shared preferences or SQLite for local data storage",
+        "Handle data persistence in your app"
+      ]
+    },
+    {
+      "unit": "Day 12 (1 hours focus)",
+      "tasks": [
+        "Work on internationalization and localization in Flutter",
+        "Implement multiple languages support in your app",
+        "Explore localization techniques"
+      ]
+    },
+    {
+      "unit": "Day 13 (1 hours focus)",
+      "tasks": [
+        "Learn about Flutter web and desktop support",
+        "Adapt your mobile app for web or desktop platforms",
+        "Test the app on different devices"
+      ]
+    },
+    {
+      "unit": "Day 14 (1 hours focus)",
+      "tasks": [
+        "Refactor and optimize your Flutter codebase",
+        "Apply best practices for code structure and readability",
+        "Optimize performance and memory usage"
+      ]
+    },
+    {
+      "unit": "Day 15 (1 hours focus)",
+      "tasks": [
+        "Review and improve UI/UX design of your Flutter app",
+        "Gather feedback and make necessary design changes",
+        "Ensure app meets design guidelines"
+      ]
+    },
+    {
+      "unit": "Day 16 (1 hours focus)",
+      "tasks": [
+        "Prepare for deployment of your Flutter app",
+        "Generate APK/IPA files for distribution",
+        "Publish the app to Google Play Store or Apple App Store"
+      ]
+    },
+    {
+      "unit": "Day 17 (1 hours focus)",
+      "tasks": [
+        "Work on marketing and promotion of your Flutter app",
+        "Create promotional materials and social media posts",
+        "Reach out to potential users or reviewers"
+      ]
+    },
+    {
+      "unit": "Day 18 (1 hours focus)",
+      "tasks": [
+        "Monitor app performance and user feedback",
+        "Collect analytics data and user reviews",
+        "Iterate on the app based on feedback"
+      ]
+    }
+  ]
+}
+[2025-06-29T12:38:31.532Z] USER_ACTION: Action: Task Breakdown Request
+Details: {
+  "task": "flutter mobile development",
+  "targetTime": 12,
+  "targetTimeUnit": "months",
+  "hoursPerDayCommitment": 3,
+  "calculatedTotalDays": 360
+}
+[2025-06-29T12:38:36.215Z] OPENAI_RESPONSE: Context: Task Breakdown
+Response: {
+  "breakdown": [
+    {
+      "unit": "Day 1 (3 hours focus)",
+      "tasks": [
+        "LEARNING GOAL: By end of day, you will have Flutter environment set up",
+        "Step 1: Download Flutter SDK from https://flutter.dev/docs/get-started/install",
+        "Step 2: Extract ZIP to C:\\flutter (Windows) or ~/development/flutter (Mac/Linux)",
+        "Step 3: Add flutter/bin to system PATH environment variable",
+        "Practice: Run 'flutter doctor' in terminal to verify installation"
+      ]
+    },
+    {
+      "unit": "Day 2 (3 hours focus)",
+      "tasks": [
+        "LEARNING GOAL: By end of day, you will have created your first Flutter project",
+        "Step 1: Create a new Flutter project: 'flutter create my_first_app'",
+        "Step 2: Explore project structure and files created",
+        "Step 3: Run the project on an emulator or physical device",
+        "Practice: Modify main.dart to display 'Hello World' with custom styling"
+      ]
+    },
+    {
+      "unit": "Day 3 (3 hours focus)",
+      "tasks": [
+        "LEARNING GOAL: By end of day, you will understand Flutter widgets",
+        "Step 1: Read Flutter documentation on widgets (30 min): StatelessWidget vs StatefulWidget",
+        "Step 2: Watch 'Flutter Widget of the Week' videos on YouTube: Container, Row, Column",
+        "Step 3: Implement a StatelessWidget and a StatefulWidget in your project",
+        "Practice: Create a layout using Row and Column widgets"
+      ]
+    }
+  ]
+}
+[2025-06-29T12:48:10.568Z] USER_ACTION: Action: Task Breakdown Request
+Details: {
+  "task": "I want to learn C++",
+  "targetTime": 10,
+  "targetTimeUnit": "months",
+  "hoursPerDayCommitment": 6,
+  "calculatedTotalDays": 300
+}
+[2025-06-29T12:48:25.521Z] OPENAI_RESPONSE: Context: Task Breakdown
+Response: {
+  "breakdown": [
+    {
+      "unit": "Day 1 (6 hours focus)",
+      "tasks": [
+        "LEARNING GOAL: By end of day, you will have an overview of C++ and its features",
+        "Read 'C++ Programming Language' by Bjarne Stroustrup (Chapters 1-3) (90 min)",
+        "Watch 'C++ for Beginners' tutorial on YouTube (60 min)",
+        "Write a simple 'Hello World' program in C++ (30 min)",
+        "Practice: Write a program to calculate the sum of two numbers"
+      ]
+    },
+    {
+      "unit": "Day 2 (6 hours focus)",
+      "tasks": [
+        "LEARNING GOAL: By end of day, you will understand basic syntax and data types in C++",
+        "Read 'C++ Primer' by Stanley B. Lippman (Chapter 4) (90 min)",
+        "Practice declaring variables of different data types in C++ (60 min)",
+        "Complete exercises on arithmetic operations in C++ (30 min)",
+        "Practice: Implement a program to swap two numbers"
+      ]
+    },
+    {
+      "unit": "Day 3 (6 hours focus)",
+      "tasks": [
+        "LEARNING GOAL: By end of day, you will grasp the concept of control structures in C++",
+        "Read 'C++ Primer' by Stanley B. Lippman (Chapters 5-6) (90 min)",
+        "Practice using if-else statements in C++ (60 min)",
+        "Practice using loops (for, while) in C++ (60 min)",
+        "Practice: Write a program to find the factorial of a number using a loop"
+      ]
+    },
+    {
+      "unit": "Day 4 (6 hours focus)",
+      "tasks": [
+        "LEARNING GOAL: By end of day, you will learn about functions and arrays in C++",
+        "Read 'C++ Primer' by Stanley B. Lippman (Chapters 7-8) (90 min)",
+        "Practice defining and calling functions in C++ (60 min)",
+        "Practice working with one-dimensional arrays in C++ (60 min)",
+        "Practice: Implement a program to find the largest element in an array"
+      ]
+    },
+    {
+      "unit": "Day 5 (6 hours focus)",
+      "tasks": [
+        "LEARNING GOAL: By end of day, you will explore pointers and strings in C++",
+        "Read 'C++ Primer' by Stanley B. Lippman (Chapters 9-10) (90 min)",
+        "Practice using pointers in C++ (60 min)",
+        "Practice working with strings in C++ (60 min)",
+        "Practice: Write a program to concatenate two strings using pointers"
+      ]
+    },
+    {
+      "unit": "Day 6 (6 hours focus)",
+      "tasks": [
+        "LEARNING GOAL: By end of day, you will have a good understanding of object-oriented programming in C++",
+        "Read 'Thinking in C++' by Bruce Eckel (Chapters 11-12) (90 min)",
+        "Practice defining classes and objects in C++ (60 min)",
+        "Practice implementing inheritance in C++ (60 min)",
+        "Practice: Create a class hierarchy representing different shapes"
+      ]
+    },
+    {
+      "unit": "Day 7 (6 hours focus)",
+      "tasks": [
+        "LEARNING GOAL: By end of day, you will have learned about polymorphism and templates in C++",
+        "Read 'Thinking in C++' by Bruce Eckel (Chapters 13-14) (90 min)",
+        "Practice implementing polymorphism in C++ (60 min)",
+        "Practice using templates in C++ (60 min)",
+        "Practice: Create a templated function to swap two elements of any data type"
+      ]
+    },
+    {
+      "unit": "Day 8 (6 hours focus)",
+      "tasks": [
+        "LEARNING GOAL: By end of day, you will understand file handling and exception handling in C++",
+        "Read 'C++ Primer' by Stanley B. Lippman (Chapters 17-18) (90 min)",
+        "Practice reading from and writing to files in C++ (60 min)",
+        "Practice handling exceptions in C++ (60 min)",
+        "Practice: Implement a program to read data from a file and handle exceptions"
+      ]
+    }
+  ]
+}
+[2025-06-29T13:00:40.807Z] USER_ACTION: Action: Task Breakdown Request
+Details: {
+  "task": "I want to learn C++",
+  "targetTime": 12,
+  "targetTimeUnit": "months",
+  "hoursPerDayCommitment": 8,
+  "calculatedTotalDays": 360
+}
+[2025-06-29T13:01:06.357Z] OPENAI_RESPONSE: Context: Task Breakdown
+Response: {
+  "breakdown": [
+    {
+      "unit": "Day 1 (8 hours focus)",
+      "tasks": [
+        "LEARNING GOAL: By end of day, you will have an understanding of C++ syntax",
+        "Read 'Chapter 1: Getting Started with C++' from 'C++ Primer' book",
+        "Watch 'Introduction to C++ Programming' video on YouTube",
+        "Practice: Write a simple 'Hello World' program in C++"
+      ]
+    },
+    {
+      "unit": "Day 2 (8 hours focus)",
+      "tasks": [
+        "LEARNING GOAL: By end of day, you will have a grasp of C++ variables and data types",
+        "Read 'Chapter 2: Variables and Basic Types' from 'C++ Primer'",
+        "Complete exercises 2.1-2.3 from the book",
+        "Practice: Write a program to declare variables of different data types in C++"
+      ]
+    },
+    {
+      "unit": "Day 3 (8 hours focus)",
+      "tasks": [
+        "LEARNING GOAL: By end of day, you will understand C++ operators and expressions",
+        "Read 'Chapter 3: Strings, Vectors, and Arrays' from 'C++ Primer'",
+        "Do exercises 3.1-3.4 from the book",
+        "Practice: Create a program to perform arithmetic operations using C++ operators"
+      ]
+    },
+    {
+      "unit": "Day 4 (8 hours focus)",
+      "tasks": [
+        "LEARNING GOAL: By end of day, you will know about control structures in C++",
+        "Read 'Chapter 4: Expressions' from 'C++ Primer'",
+        "Complete exercises 4.1-4.3 from the book",
+        "Practice: Write a C++ program that demonstrates the use of if-else statements"
+      ]
+    },
+    {
+      "unit": "Day 5 (8 hours focus)",
+      "tasks": [
+        "LEARNING GOAL: By end of day, you will have a good understanding of functions in C++",
+        "Read 'Chapter 5: Statements' from 'C++ Primer'",
+        "Do exercises 5.1-5.4 from the book",
+        "Practice: Implement a program with user-defined functions in C++"
+      ]
+    },
+    {
+      "unit": "Day 6 (8 hours focus)",
+      "tasks": [
+        "LEARNING GOAL: By end of day, you will have knowledge of arrays and pointers in C++",
+        "Read 'Chapter 6: Functions' from 'C++ Primer'",
+        "Complete exercises 6.1-6.3 from the book",
+        "Practice: Write a program to work with arrays and pointers in C++"
+      ]
+    },
+    {
+      "unit": "Day 7 (8 hours focus)",
+      "tasks": [
+        "LEARNING GOAL: By end of day, you will understand classes and objects in C++",
+        "Read 'Chapter 7: Classes' from 'C++ Primer'",
+        "Do exercises 7.1-7.3 from the book",
+        "Practice: Create a simple class and objects in C++"
+      ]
+    },
+    {
+      "unit": "Day 8 (8 hours focus)",
+      "tasks": [
+        "LEARNING GOAL: By end of day, you will be familiar with operator overloading in C++",
+        "Read 'Chapter 8: The IO Library' from 'C++ Primer'",
+        "Complete exercises 8.1-8.3 from the book",
+        "Practice: Overload operators in a C++ program"
+      ]
+    },
+    {
+      "unit": "Day 9 (8 hours focus)",
+      "tasks": [
+        "LEARNING GOAL: By end of day, you will know about inheritance and polymorphism in C++",
+        "Read 'Chapter 9: Sequential Containers' from 'C++ Primer'",
+        "Do exercises 9.1-9.4 from the book",
+        "Practice: Implement inheritance and polymorphism concepts in C++"
+      ]
+    },
+    {
+      "unit": "Day 10 (8 hours focus)",
+      "tasks": [
+        "LEARNING GOAL: By end of day, you will understand templates and exception handling in C++",
+        "Read 'Chapter 10: Generic Algorithms' from 'C++ Primer'",
+        "Complete exercises 10.1-10.3 from the book",
+        "Practice: Use templates and handle exceptions in a C++ program"
+      ]
+    }
+  ]
+}

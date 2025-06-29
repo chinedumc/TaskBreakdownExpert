@@ -76,30 +76,82 @@ export function TaskBreakdownDisplay({
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-xl">
               <ListChecks className="h-7 w-7 text-primary" />
-              Detailed Breakdown
+              Detailed Breakdown ({breakdown.length} weeks)
             </CardTitle>
-             <CardDescription>Your step-by-step plan to achieve your goal.</CardDescription>
+             <CardDescription>
+               Your step-by-step weekly learning plan to achieve your goal. Each week includes daily breakdowns and milestone achievements.
+               {breakdown.length > 12 && (
+                 <span className="block mt-1 text-sm font-medium text-primary">
+                   This is a comprehensive {breakdown.length}-week curriculum - click each week to expand details.
+                 </span>
+               )}
+             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Accordion type="single" collapsible className="w-full" defaultValue={breakdown[0]?.unit}>
-              {breakdown.map((item, index) => (
-                <AccordionItem value={item.unit || `item-${index}`} key={item.unit || `item-${index}`}>
-                  <AccordionTrigger className="text-lg font-semibold hover:no-underline">
-                    {item.unit}
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    <ul className="space-y-3 pl-4">
-                      {item.tasks.map((task, taskIndex) => (
-                        <li key={taskIndex} className="flex items-start gap-3">
-                          <CheckCircle className="h-5 w-5 text-accent mt-1 shrink-0" />
-                          <span className="text-base">{task}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
+            {breakdown.length > 24 ? (
+              // Group by months for very long curricula (>6 months)
+              <div className="space-y-6">
+                {Array.from({ length: Math.ceil(breakdown.length / 4) }, (_, monthIndex) => {
+                  const monthStart = monthIndex * 4;
+                  const monthEnd = Math.min(monthStart + 4, breakdown.length);
+                  const monthWeeks = breakdown.slice(monthStart, monthEnd);
+                  
+                  return (
+                    <div key={monthIndex} className="border rounded-lg p-4">
+                      <h3 className="text-lg font-semibold mb-3 text-primary">
+                        Month {monthIndex + 1} (Weeks {monthStart + 1}-{monthEnd})
+                      </h3>
+                      <Accordion type="single" collapsible className="w-full">
+                        {monthWeeks.map((item, weekIndex) => {
+                          const globalIndex = monthStart + weekIndex;
+                          return (
+                            <AccordionItem 
+                              value={item.unit || `item-${globalIndex}`} 
+                              key={item.unit || `item-${globalIndex}`}
+                            >
+                              <AccordionTrigger className="text-base font-medium hover:no-underline">
+                                {item.unit}
+                              </AccordionTrigger>
+                              <AccordionContent>
+                                <ul className="space-y-3 pl-4">
+                                  {item.tasks.map((task, taskIndex) => (
+                                    <li key={taskIndex} className="flex items-start gap-3">
+                                      <CheckCircle className="h-4 w-4 text-accent mt-1 shrink-0" />
+                                      <span className="text-sm">{task}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </AccordionContent>
+                            </AccordionItem>
+                          );
+                        })}
+                      </Accordion>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              // Original display for shorter curricula
+              <Accordion type="single" collapsible className="w-full" defaultValue={breakdown[0]?.unit}>
+                {breakdown.map((item, index) => (
+                  <AccordionItem value={item.unit || `item-${index}`} key={item.unit || `item-${index}`}>
+                    <AccordionTrigger className="text-lg font-semibold hover:no-underline">
+                      {item.unit}
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <ul className="space-y-3 pl-4">
+                        {item.tasks.map((task, taskIndex) => (
+                          <li key={taskIndex} className="flex items-start gap-3">
+                            <CheckCircle className="h-5 w-5 text-accent mt-1 shrink-0" />
+                            <span className="text-base">{task}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            )}
           </CardContent>
         </Card>
       )}

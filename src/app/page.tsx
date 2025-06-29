@@ -2,22 +2,18 @@
 "use client";
 
 import type { NextPage } from 'next';
-// Image component is no longer used for the logo
-// import Image from 'next/image'; 
 import * as React from 'react';
-// BrainCircuit is not used, but kept to avoid breaking imports if re-added.
-// import { BrainCircuit } from 'lucide-react'; 
 
 import { TaskInputForm } from '@/components/task-input-form';
 import { TaskBreakdownDisplay } from '@/components/task-breakdown-display';
 import { EmailExport } from '@/components/email-export';
-import { DownloadBreakdown } from '@/components/download-breakdown'; // Added import
-// Toaster import removed as it's handled in layout.tsx
+import { DownloadBreakdown } from '@/components/download-breakdown';
+import { ErrorBoundary } from '@/components/error-boundary';
 import { useToast } from '@/hooks/use-toast';
 import type { TaskBreakdownFormValues, EmailExportFormValues } from '@/lib/schemas';
 import { ai } from '@/ai/openai';
 import { taskBreakdown, type TaskBreakdownOutput } from '@/ai/flows/task-breakdown';
-import { logger } from '@/utils/logger';
+import { logger } from '@/utils/client-logger';
 import { summarizeTaskBreakdown } from '@/ai/flows/task-summary';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Terminal } from "lucide-react";
@@ -53,8 +49,22 @@ const Home: NextPage = () => {
         breakdownOutput = await taskBreakdown(values);
         await logger.logOpenAIResponse('Task Breakdown', breakdownOutput);
 
-        if (!breakdownOutput.breakdown || breakdownOutput.breakdown.length === 0) {
-          throw new Error('No breakdown data received from AI');
+        if (!breakdownOutput) {
+          throw new Error('No response received from AI');
+        }
+        
+        if (!breakdownOutput.breakdown) {
+          throw new Error('Breakdown data is missing from AI response');
+        }
+        
+        if (breakdownOutput.breakdown.length === 0) {
+          throw new Error('AI returned empty breakdown - please try again with a different task description');
+        }
+        
+        // Validate breakdown structure
+        const invalidItems = breakdownOutput.breakdown.filter(item => !item.unit || !item.tasks || item.tasks.length === 0);
+        if (invalidItems.length > 0) {
+          throw new Error(`AI returned incomplete breakdown data - ${invalidItems.length} items are missing details`);
         }
 
         // Log successful breakdown
@@ -73,32 +83,36 @@ const Home: NextPage = () => {
       }
 
       setTaskBreakdownResult(breakdownOutput);
+      setIsLoadingBreakdown(false);
       toast({
         title: "Task Breakdown Generated!",
         description: "Your detailed plan is ready.",
         variant: "default",
       });
-      setIsLoadingBreakdown(false);
 
-      const breakdownText = breakdownOutput.breakdown
-        .map(unit => `${unit.unit}:\n- ${unit.tasks.join('\n- ')}\n`)
-        .join('\n');
-      
-      await logger.logUserAction('Summary Request', { breakdownText });
-      
-      const summaryOutput = await summarizeTaskBreakdown({ taskBreakdown: breakdownText });
-      await logger.logOpenAIResponse('Summary', summaryOutput);
+      // Generate summary separately - don't let summary failure affect breakdown display
+      try {
+        const breakdownText = breakdownOutput.breakdown
+          .map(unit => `${unit.unit}:\n- ${unit.tasks.join('\n- ')}\n`)
+          .join('\n');
+        
+        await logger.logUserAction('Summary Request', { breakdownText });
+        
+        const summaryOutput = await summarizeTaskBreakdown({ taskBreakdown: breakdownText });
+        await logger.logOpenAIResponse('Summary', summaryOutput);
 
-      if (!summaryOutput.summary) {
-        throw new Error('No summary received from AI');
+        if (summaryOutput.summary) {
+          setTaskSummary(summaryOutput.summary);
+          toast({
+            title: "Summary Ready!",
+            description: "A concise overview of your plan is available.",
+            variant: "default",
+          });
+        }
+      } catch (summaryError) {
+        console.warn("Summary generation failed, but breakdown is still available:", summaryError);
+        // Don't throw - allow breakdown to display without summary
       }
-
-      setTaskSummary(summaryOutput.summary);
-      toast({
-        title: "Summary Ready!",
-        description: "A concise overview of your plan is available.",
-        variant: "default",
-      });
     } catch (error) {
       console.error("Error processing task:", error);
       const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred.";
@@ -109,7 +123,6 @@ const Home: NextPage = () => {
         variant: "destructive",
       });
     } finally {
-      setIsLoadingBreakdown(false);
       setIsLoadingSummary(false);
     }
   };
@@ -148,7 +161,9 @@ const Home: NextPage = () => {
         </header>
 
         <main className="w-full max-w-3xl space-y-12">
-          <TaskInputForm onSubmit={handleTaskSubmit} isLoading={isLoadingBreakdown || isLoadingSummary} />
+          <ErrorBoundary>
+            <TaskInputForm onSubmit={handleTaskSubmit} isLoading={isLoadingBreakdown || isLoadingSummary} />
+          </ErrorBoundary>
 
           {aiError && (
              <Alert variant="destructive" className="shadow-md">
@@ -158,28 +173,32 @@ const Home: NextPage = () => {
             </Alert>
           )}
 
-          {isLoadingBreakdown || isLoadingSummary ? (
-             <TaskBreakdownDisplay
-               summary={null}
-               breakdown={null}
-               isLoadingSummary={isLoadingSummary}
-               isLoadingBreakdown={isLoadingBreakdown}
-             />
-           ) : taskBreakdownResult || taskSummary ? (
-             <TaskBreakdownDisplay
-               summary={taskSummary}
-               breakdown={taskBreakdownResult?.breakdown ?? []}
-               isLoadingSummary={false}
-               isLoadingBreakdown={false}
-             />
-           ) : null}
+          <ErrorBoundary>
+            {isLoadingBreakdown || isLoadingSummary ? (
+               <TaskBreakdownDisplay
+                 summary={null}
+                 breakdown={null}
+                 isLoadingSummary={isLoadingSummary}
+                 isLoadingBreakdown={isLoadingBreakdown}
+               />
+             ) : taskBreakdownResult ? (
+               <TaskBreakdownDisplay
+                 summary={taskSummary}
+                 breakdown={taskBreakdownResult.breakdown}
+                 isLoadingSummary={isLoadingSummary}
+                 isLoadingBreakdown={isLoadingBreakdown}
+               />
+             ) : null}
+          </ErrorBoundary>
 
-          {taskBreakdownResult && !isLoadingBreakdown && !isLoadingSummary && (
-            <div className="space-y-6"> {/* Wrapper for consistent spacing */}
-              <EmailExport onSubmitEmail={handleEmailSubmit} isExporting={isSubmittingEmail} />
-              <DownloadBreakdown breakdown={taskBreakdownResult?.breakdown ?? []} />
-            </div>
-          )}
+          <ErrorBoundary>
+            {taskBreakdownResult && !isLoadingBreakdown && !isLoadingSummary && (
+              <div className="space-y-6">
+                <EmailExport onSubmitEmail={handleEmailSubmit} isExporting={isSubmittingEmail} />
+                <DownloadBreakdown breakdown={taskBreakdownResult?.breakdown ?? []} />
+              </div>
+            )}
+          </ErrorBoundary>
         </main>
         <footer className="mt-16 w-full max-w-3xl border-t pt-8 text-center">
           <p className="text-sm text-muted-foreground">
@@ -187,7 +206,6 @@ const Home: NextPage = () => {
           </p>
         </footer>
       </div>
-      {/* Toaster component removed from here, as it's in layout.tsx */}
     </>
   );
 };

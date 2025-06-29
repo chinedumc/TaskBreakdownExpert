@@ -6,9 +6,9 @@ export const TaskBreakdownFormSchema = z.object({
   targetTimeUnit: z.enum(['hours', 'days', 'months'], {
     errorMap: () => ({ message: "Please select a unit for the target duration." }),
   }),
-  planGranularity: z.enum(['daily'], { // Fixed to daily
-    errorMap: () => ({ message: "Planning granularity is set to daily." }),
-  }).default('daily'),
+  planGranularity: z.enum(['weekly'], { // Fixed to weekly
+    errorMap: () => ({ message: "Planning granularity is set to weekly." }),
+  }).default('weekly'),
   hoursPerDayCommitment: z.coerce.number().int({ message: "Daily commitment must be a whole number." })
     .positive({ message: "Daily commitment must be a positive whole number." })
     .min(1, { message: "Please commit at least 1 hour per day." })
