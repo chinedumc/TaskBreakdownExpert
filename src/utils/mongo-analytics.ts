@@ -48,19 +48,26 @@ export class MongoAnalyticsLogger {
     }
 
     try {
+      console.log('🔗 Connecting to MongoDB for analytics...');
       this.client = new MongoClient(this.connectionString);
       await this.client.connect();
       this.db = this.client.db(this.dbName);
-      this.metricsCollection = this.db.collection('metrics');
-      this.eventsCollection = this.db.collection('events');
+      this.metricsCollection = this.db.collection('analytics');
+      this.eventsCollection = this.db.collection('user_attempts');
       
       // Ensure indexes
       await this.eventsCollection.createIndex({ timestamp: -1 });
       await this.eventsCollection.createIndex({ type: 1 });
       
-      console.log('Connected to MongoDB for analytics');
+      console.log('✅ Connected to MongoDB for analytics');
     } catch (error) {
-      console.error('Failed to connect to MongoDB:', error);
+      console.error('❌ Failed to connect to MongoDB:', error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (errorMessage.includes('bad auth')) {
+        console.error('🔐 MongoDB authentication failed - check credentials');
+      } else if (errorMessage.includes('ENOTFOUND')) {
+        console.error('🌐 MongoDB host not found - check connection string');
+      }
       throw error;
     }
   }
@@ -76,12 +83,13 @@ export class MongoAnalyticsLogger {
   }
 
   private async readCurrentMetrics(): Promise<AnalyticsMetrics> {
-    await this.connect();
-    
     try {
+      await this.connect();
+      
       const metrics = await this.metricsCollection!.findOne({ _id: 'global' } as any);
       
       if (metrics) {
+        console.log('✅ Successfully read metrics from MongoDB');
         return {
           taskBreakdownsGenerated: metrics.taskBreakdownsGenerated || 0,
           emailsSent: metrics.emailsSent || 0,
@@ -90,22 +98,32 @@ export class MongoAnalyticsLogger {
           recentTasks: metrics.recentTasks || []
         };
       }
+      
+      // Document doesn't exist, create it with default metrics
+      console.log('📝 No metrics document found, creating default metrics');
+      const defaultMetrics: AnalyticsMetrics = {
+        taskBreakdownsGenerated: 0,
+        emailsSent: 0,
+        downloadsCompleted: 0,
+        lastUpdated: new Date().toISOString(),
+        recentTasks: []
+      };
+      
+      await this.writeMetrics(defaultMetrics);
+      return defaultMetrics;
+      
     } catch (error) {
-      console.error('Failed to read metrics from MongoDB:', error);
+      console.error('❌ Failed to read/create metrics in MongoDB:', error);
+      
+      // Return default metrics without trying to write to MongoDB
+      return {
+        taskBreakdownsGenerated: 0,
+        emailsSent: 0,
+        downloadsCompleted: 0,
+        lastUpdated: new Date().toISOString(),
+        recentTasks: []
+      };
     }
-
-    // Return default metrics if document doesn't exist or can't be read
-    const defaultMetrics: AnalyticsMetrics = {
-      taskBreakdownsGenerated: 0,
-      emailsSent: 0,
-      downloadsCompleted: 0,
-      lastUpdated: new Date().toISOString(),
-      recentTasks: []
-    };
-
-    // Create the document with default metrics
-    await this.writeMetrics(defaultMetrics);
-    return defaultMetrics;
   }
 
   private async writeMetrics(metrics: AnalyticsMetrics): Promise<void> {

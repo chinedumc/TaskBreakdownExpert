@@ -5,6 +5,7 @@ export class UnifiedAnalyticsService {
   private mongoLogger: MongoAnalyticsLogger | null = null;
   private fileLogger: AnalyticsLogger | null = null;
   private isProduction: boolean;
+  private mongoFailed: boolean = false;
 
   constructor() {
     this.isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'production';
@@ -15,6 +16,7 @@ export class UnifiedAnalyticsService {
         console.log('Using MongoDB analytics for production');
       } catch (error) {
         console.error('Failed to initialize MongoDB analytics, falling back to local:', error);
+        this.mongoFailed = true;
         this.initializeFileLogger();
       }
     } else {
@@ -69,8 +71,33 @@ export class UnifiedAnalyticsService {
 
   async getCurrentMetrics() {
     try {
-      if (this.mongoLogger) {
-        return await this.mongoLogger.getCurrentMetrics();
+      if (this.mongoLogger && !this.mongoFailed) {
+        try {
+          const metrics = await this.mongoLogger.getCurrentMetrics();
+          console.log('✅ Successfully retrieved metrics from MongoDB');
+          return metrics;
+        } catch (mongoError) {
+          console.error('❌ MongoDB metrics failed:', mongoError);
+          this.mongoFailed = true;
+          
+          // Try to fallback to file logger if in development
+          if (!this.isProduction) {
+            console.log('🔄 Falling back to file analytics');
+            this.initializeFileLogger();
+            if (this.fileLogger) {
+              return this.fileLogger.getCurrentMetrics();
+            }
+          }
+          
+          // Return default metrics with error info
+          return {
+            taskBreakdownsGenerated: 0,
+            emailsSent: 0,
+            downloadsCompleted: 0,
+            lastUpdated: new Date().toISOString(),
+            recentTasks: [`Error: MongoDB failed - ${mongoError instanceof Error ? mongoError.message : 'Unknown error'}`]
+          };
+        }
       } else if (this.fileLogger) {
         return this.fileLogger.getCurrentMetrics();
       }
@@ -81,7 +108,7 @@ export class UnifiedAnalyticsService {
         emailsSent: 0,
         downloadsCompleted: 0,
         lastUpdated: new Date().toISOString(),
-        recentTasks: []
+        recentTasks: this.mongoFailed ? ['Error: MongoDB authentication failed'] : ['No analytics logger available']
       };
     } catch (error) {
       console.error('Failed to get current metrics:', error);
@@ -90,7 +117,7 @@ export class UnifiedAnalyticsService {
         emailsSent: 0,
         downloadsCompleted: 0,
         lastUpdated: new Date().toISOString(),
-        recentTasks: []
+        recentTasks: [`System error: ${error instanceof Error ? error.message : 'Unknown error'}`]
       };
     }
   }
@@ -110,8 +137,10 @@ export class UnifiedAnalyticsService {
   }
 
   getStorageInfo(): string {
-    if (this.mongoLogger) {
+    if (this.mongoLogger && !this.mongoFailed) {
       return 'MongoDB (Production)';
+    } else if (this.mongoFailed) {
+      return 'MongoDB (Failed - check credentials)';
     } else if (this.fileLogger) {
       return `Local Files (Development) - ${this.fileLogger.getAnalyticsFilePath()}`;
     }
