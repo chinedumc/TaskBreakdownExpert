@@ -42,68 +42,141 @@ export function DownloadBreakdown({ breakdown }: DownloadBreakdownProps): React.
     try {
       setIsLoading(true);
       const pdfDoc = await PDFDocument.create();
-      const page = pdfDoc.addPage([600, 800]);
       const fontSize = 12;
       const lineHeight = fontSize * 1.5;
+      const pageWidth = 600;
+      const pageHeight = 800;
+      const marginX = 50;
+      const marginY = 50;
+      const headerHeight = 100; // Space for title and date
       
-      // Add title
-      page.drawText('Task Breakdown', {
-        x: 50,
-        y: 750,
-        size: 20,
-        color: rgb(0, 0, 0),
-      });
+      // Helper function to add a new page with header
+      const addNewPage = (pageNum: number) => {
+        const page = pdfDoc.addPage([pageWidth, pageHeight]);
+        
+        if (pageNum === 1) {
+          // First page title
+          page.drawText('Task Breakdown', {
+            x: marginX,
+            y: pageHeight - 50,
+            size: 20,
+            color: rgb(0, 0, 0),
+          });
 
-      // Add date
-      page.drawText(format(new Date(), 'MMMM d, yyyy'), {
-        x: 50,
-        y: 730,
-        size: 10,
-        color: rgb(0.5, 0.5, 0.5),
-      });
-
-      // Add content
-      let currentY = 700;
-      for (const item of breakdown) {
-        if (currentY < 50) {
-          page.drawText('... (continued on next page)', {
-            x: 50,
-            y: currentY,
-            size: fontSize,
+          // Add date
+          page.drawText(format(new Date(), 'MMMM d, yyyy'), {
+            x: marginX,
+            y: pageHeight - 70,
+            size: 10,
             color: rgb(0.5, 0.5, 0.5),
           });
-          break;
+          
+          return { page, startY: pageHeight - headerHeight };
+        } else {
+          // Subsequent page header
+          page.drawText(`Task Breakdown (Page ${pageNum})`, {
+            x: marginX,
+            y: pageHeight - 30,
+            size: 14,
+            color: rgb(0, 0, 0),
+          });
+          
+          return { page, startY: pageHeight - 60 };
+        }
+      };
+      
+      let pageNum = 1;
+      let { page, startY } = addNewPage(pageNum);
+      let currentY = startY;
+      
+      // Pre-load fonts
+      const boldFont = await pdfDoc.embedFont('Helvetica-Bold');
+      const regularFont = await pdfDoc.embedFont('Helvetica');
+      
+      for (let itemIndex = 0; itemIndex < breakdown.length; itemIndex++) {
+        const item = breakdown[itemIndex];
+        
+        // Check if we need a new page for the item header
+        if (currentY < marginY + lineHeight * 3) { // Need space for header + at least one task
+          pageNum++;
+          const newPageData = addNewPage(pageNum);
+          page = newPageData.page;
+          currentY = newPageData.startY;
         }
 
-        const font = await pdfDoc.embedFont('Helvetica-Bold');
+        // Draw the week/unit header
         page.drawText(item.unit, {
-          x: 50,
+          x: marginX,
           y: currentY,
           size: fontSize,
           color: rgb(0, 0, 0),
-          font,
+          font: boldFont,
         });
-        currentY -= lineHeight;
+        currentY -= lineHeight * 1.5; // Extra space after header
 
-        item.tasks.forEach(task => {
-          if (currentY < 50) {
-            page.drawText('... (continued on next page)', {
-              x: 50,
+        // Draw each task
+        for (let taskIndex = 0; taskIndex < item.tasks.length; taskIndex++) {
+          const task = item.tasks[taskIndex];
+          
+          // Check if we need a new page for this task
+          if (currentY < marginY + lineHeight) {
+            pageNum++;
+            const newPageData = addNewPage(pageNum);
+            page = newPageData.page;
+            currentY = newPageData.startY;
+          }
+          
+          // Handle long task text that might need to wrap
+          const maxWidth = pageWidth - marginX - 70; // Account for bullet point indent
+          const words = task.split(' ');
+          let currentLine = '';
+          
+          for (const word of words) {
+            const testLine = currentLine + (currentLine ? ' ' : '') + word;
+            const textWidth = testLine.length * (fontSize * 0.6); // Approximate text width
+            
+            if (textWidth > maxWidth && currentLine) {
+              // Draw current line and start new line
+              page.drawText(`• ${currentLine}`, {
+                x: marginX + 10,
+                y: currentY,
+                size: fontSize,
+                color: rgb(0, 0, 0),
+                font: regularFont,
+              });
+              currentY -= lineHeight;
+              
+              // Check if we need a new page for the next line
+              if (currentY < marginY + lineHeight) {
+                pageNum++;
+                const newPageData = addNewPage(pageNum);
+                page = newPageData.page;
+                currentY = newPageData.startY;
+              }
+              
+              currentLine = word;
+            } else {
+              currentLine = testLine;
+            }
+          }
+          
+          // Draw the last line
+          if (currentLine) {
+            const prefix = taskIndex === 0 && currentLine === task ? `• ${task}` : `  ${currentLine}`;
+            page.drawText(prefix, {
+              x: marginX + 10,
               y: currentY,
               size: fontSize,
-              color: rgb(0.5, 0.5, 0.5),
+              color: rgb(0, 0, 0),
+              font: regularFont,
             });
-            return;
+            currentY -= lineHeight;
           }
-          page.drawText(`- ${task}`, {
-            x: 60,
-            y: currentY,
-            size: fontSize,
-            color: rgb(0, 0, 0),
-          });
-          currentY -= lineHeight;
-        });
-      };
+        }
+        
+        // Add extra space between weeks
+        currentY -= lineHeight * 0.5;
+      }
 
       const pdfBytes = await pdfDoc.save();
       const blob = new Blob([pdfBytes], { type: 'application/pdf' });
