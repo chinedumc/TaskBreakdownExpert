@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { AnalyticsLogger } from '@/utils/analytics-logger';
+import { analyticsService } from '@/utils/unified-analytics';
 import { z } from 'zod';
-
-const analyticsLogger = new AnalyticsLogger();
 
 const TrackDownloadSchema = z.object({
   downloadType: z.enum(['pdf', 'text']),
@@ -14,7 +12,7 @@ export async function POST(request: NextRequest) {
     const validatedData = TrackDownloadSchema.parse(body);
     
     // Track the download
-    analyticsLogger.incrementDownloads();
+    await analyticsService.incrementDownloads(validatedData.downloadType);
     
     return NextResponse.json({ 
       success: true, 

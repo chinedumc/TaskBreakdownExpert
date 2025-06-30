@@ -11,9 +11,8 @@
 
 import { ai, DEFAULT_MODEL } from '@/ai/openai';
 import { ServerLogger } from '@/utils/logger';
-import { AnalyticsLogger } from '@/utils/analytics-logger';
+import { analyticsService } from '@/utils/unified-analytics';
 const serverLogger = new ServerLogger();
-const analyticsLogger = new AnalyticsLogger();
 import { z } from 'zod';
 
 const TaskBreakdownInputSchema = z.object({
@@ -231,7 +230,7 @@ export async function taskBreakdown(values: TaskBreakdownInput): Promise<TaskBre
     }
 
     // Track successful task breakdown generation
-    analyticsLogger.incrementTaskBreakdowns(values.task);
+    await analyticsService.incrementTaskBreakdowns(values.task);
     
     return result;
   } catch (error) {

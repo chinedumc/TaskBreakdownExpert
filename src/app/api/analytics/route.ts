@@ -1,12 +1,10 @@
 import { NextResponse } from 'next/server';
-import { AnalyticsLogger } from '@/utils/analytics-logger';
-
-const analyticsLogger = new AnalyticsLogger();
+import { analyticsService } from '@/utils/unified-analytics';
 
 export async function GET() {
   try {
-    const metrics = analyticsLogger.getCurrentMetrics();
-    const analyticsFilePath = analyticsLogger.getAnalyticsFilePath();
+    const metrics = await analyticsService.getCurrentMetrics();
+    const storageInfo = analyticsService.getStorageInfo();
     
     // Create a summary of recent tasks (first 20 characters + count)
     const taskSummary = metrics.recentTasks.slice(0, 10).map(task => 
@@ -23,7 +21,7 @@ export async function GET() {
         recentTasksCount: metrics.recentTasks.length,
         recentTasksSample: taskSummary
       },
-      analyticsFile: analyticsFilePath,
+      storage: storageInfo,
       message: 'Analytics data retrieved successfully'
     });
   } catch (error) {

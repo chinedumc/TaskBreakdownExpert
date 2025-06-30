@@ -1,10 +1,9 @@
 import { Resend } from 'resend';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { AnalyticsLogger } from '@/utils/analytics-logger';
+import { analyticsService } from '@/utils/unified-analytics';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-const analyticsLogger = new AnalyticsLogger();
 
 const EmailRequestSchema = z.object({
   email: z.string().email(),
@@ -41,7 +40,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Track successful email send
-    analyticsLogger.incrementEmailsSent();
+    await analyticsService.incrementEmailsSent();
 
     return NextResponse.json({ success: true, messageId: data?.id });
   } catch (error) {
