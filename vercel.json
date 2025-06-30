@@ -6,8 +6,5 @@
     "src/app/api/*/route.ts": {
       "maxDuration": 30
     }
-  },
-  "env": {
-    "NEXT_PUBLIC_VERCEL_ENV": "@vercel-env"
   }
 }
