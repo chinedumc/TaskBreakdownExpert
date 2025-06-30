@@ -127,16 +127,32 @@ export class MongoAnalyticsLogger {
   }
 
   private async writeMetrics(metrics: AnalyticsMetrics): Promise<void> {
-    await this.connect();
-    
     try {
-      await this.metricsCollection!.replaceOne(
+      await this.connect();
+      
+      console.log('🔄 Writing metrics to MongoDB:', JSON.stringify(metrics, null, 2));
+      
+      const result = await this.metricsCollection!.replaceOne(
         { _id: 'global' } as any,
         { _id: 'global', ...metrics } as any,
         { upsert: true }
       );
+      
+      console.log('✅ MongoDB write result:', {
+        acknowledged: result.acknowledged,
+        matchedCount: result.matchedCount,
+        modifiedCount: result.modifiedCount,
+        upsertedCount: result.upsertedCount
+      });
+      
     } catch (error) {
-      console.error('Failed to write metrics to MongoDB:', error);
+      console.error('❌ Failed to write metrics to MongoDB:', error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (errorMessage.includes('bad auth')) {
+        console.error('🔐 Authentication failed - check MongoDB credentials');
+      } else if (errorMessage.includes('timeout')) {
+        console.error('⏱️ Connection timeout - check network access');
+      }
       throw error;
     }
   }
@@ -157,6 +173,7 @@ export class MongoAnalyticsLogger {
 
   public async incrementTaskBreakdowns(taskDescription?: string): Promise<void> {
     try {
+      console.log('📈 Incrementing task breakdowns...');
       const metrics = await this.readCurrentMetrics();
       metrics.taskBreakdownsGenerated += 1;
       metrics.lastUpdated = new Date().toISOString();
@@ -179,9 +196,10 @@ export class MongoAnalyticsLogger {
         data: { taskDescription }
       });
       
-      console.log(`Analytics: Task breakdowns generated: ${metrics.taskBreakdownsGenerated}`);
+      console.log(`✅ Analytics: Task breakdowns generated: ${metrics.taskBreakdownsGenerated}`);
     } catch (error) {
-      console.error('Failed to increment task breakdowns:', error);
+      console.error('❌ Failed to increment task breakdowns:', error);
+      // Don't throw to avoid breaking the main functionality, but log the failure
     }
   }
 
@@ -206,6 +224,7 @@ export class MongoAnalyticsLogger {
 
   public async incrementDownloads(downloadType?: string): Promise<void> {
     try {
+      console.log('📈 Incrementing downloads...');
       const metrics = await this.readCurrentMetrics();
       metrics.downloadsCompleted += 1;
       metrics.lastUpdated = new Date().toISOString();
@@ -218,9 +237,10 @@ export class MongoAnalyticsLogger {
         data: { downloadType }
       });
       
-      console.log(`Analytics: Downloads completed: ${metrics.downloadsCompleted}`);
+      console.log(`✅ Analytics: Downloads completed: ${metrics.downloadsCompleted}`);
     } catch (error) {
-      console.error('Failed to increment downloads:', error);
+      console.error('❌ Failed to increment downloads:', error);
+      // Don't throw to avoid breaking the main functionality, but log the failure
     }
   }
 
