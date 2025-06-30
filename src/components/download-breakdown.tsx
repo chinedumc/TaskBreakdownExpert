@@ -42,6 +42,11 @@ export function DownloadBreakdown({ breakdown }: DownloadBreakdownProps): React.
     try {
       setIsLoading(true);
       const pdfDoc = await PDFDocument.create();
+      
+      // Pre-load fonts first
+      const boldFont = await pdfDoc.embedFont('Helvetica-Bold');
+      const regularFont = await pdfDoc.embedFont('Helvetica');
+      
       const fontSize = 12;
       const lineHeight = fontSize * 1.5;
       const pageWidth = 600;
@@ -61,6 +66,7 @@ export function DownloadBreakdown({ breakdown }: DownloadBreakdownProps): React.
             y: pageHeight - 50,
             size: 20,
             color: rgb(0, 0, 0),
+            font: boldFont,
           });
 
           // Add date
@@ -69,6 +75,7 @@ export function DownloadBreakdown({ breakdown }: DownloadBreakdownProps): React.
             y: pageHeight - 70,
             size: 10,
             color: rgb(0.5, 0.5, 0.5),
+            font: regularFont,
           });
           
           return { page, startY: pageHeight - headerHeight };
@@ -79,6 +86,7 @@ export function DownloadBreakdown({ breakdown }: DownloadBreakdownProps): React.
             y: pageHeight - 30,
             size: 14,
             color: rgb(0, 0, 0),
+            font: boldFont,
           });
           
           return { page, startY: pageHeight - 60 };
@@ -88,10 +96,6 @@ export function DownloadBreakdown({ breakdown }: DownloadBreakdownProps): React.
       let pageNum = 1;
       let { page, startY } = addNewPage(pageNum);
       let currentY = startY;
-      
-      // Pre-load fonts
-      const boldFont = await pdfDoc.embedFont('Helvetica-Bold');
-      const regularFont = await pdfDoc.embedFont('Helvetica');
       
       for (let itemIndex = 0; itemIndex < breakdown.length; itemIndex++) {
         const item = breakdown[itemIndex];
@@ -127,43 +131,44 @@ export function DownloadBreakdown({ breakdown }: DownloadBreakdownProps): React.
           }
           
           // Handle long task text that might need to wrap
-          const maxWidth = pageWidth - marginX - 70; // Account for bullet point indent
+          const maxLineWidth = pageWidth - marginX - 70; // Account for bullet point indent
           const words = task.split(' ');
+          const lines: string[] = [];
           let currentLine = '';
           
+          // Better text wrapping algorithm
           for (const word of words) {
             const testLine = currentLine + (currentLine ? ' ' : '') + word;
-            const textWidth = testLine.length * (fontSize * 0.6); // Approximate text width
+            const textWidth = regularFont.widthOfTextAtSize(testLine, fontSize);
             
-            if (textWidth > maxWidth && currentLine) {
-              // Draw current line and start new line
-              page.drawText(`• ${currentLine}`, {
-                x: marginX + 10,
-                y: currentY,
-                size: fontSize,
-                color: rgb(0, 0, 0),
-                font: regularFont,
-              });
-              currentY -= lineHeight;
-              
-              // Check if we need a new page for the next line
-              if (currentY < marginY + lineHeight) {
-                pageNum++;
-                const newPageData = addNewPage(pageNum);
-                page = newPageData.page;
-                currentY = newPageData.startY;
-              }
-              
+            if (textWidth > maxLineWidth && currentLine) {
+              lines.push(currentLine);
               currentLine = word;
             } else {
               currentLine = testLine;
             }
           }
           
-          // Draw the last line
+          // Add the last line
           if (currentLine) {
-            const prefix = taskIndex === 0 && currentLine === task ? `• ${task}` : `  ${currentLine}`;
-            page.drawText(prefix, {
+            lines.push(currentLine);
+          }
+          
+          // Draw all lines for this task
+          for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
+            const line = lines[lineIndex];
+            const isFirstLine = lineIndex === 0;
+            const prefix = isFirstLine ? '• ' : '  ';
+            
+            // Check if we need a new page for this line
+            if (currentY < marginY + lineHeight) {
+              pageNum++;
+              const newPageData = addNewPage(pageNum);
+              page = newPageData.page;
+              currentY = newPageData.startY;
+            }
+            
+            page.drawText(prefix + line, {
               x: marginX + 10,
               y: currentY,
               size: fontSize,
