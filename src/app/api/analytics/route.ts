@@ -17,6 +17,7 @@ export async function GET() {
         taskBreakdownsGenerated: metrics.taskBreakdownsGenerated,
         emailsSent: metrics.emailsSent,
         downloadsCompleted: metrics.downloadsCompleted,
+        visitsCount: metrics.visitsCount,
         lastUpdated: metrics.lastUpdated,
         recentTasksCount: metrics.recentTasks.length,
         recentTasksSample: taskSummary

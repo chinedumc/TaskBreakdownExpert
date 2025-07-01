@@ -4,12 +4,13 @@ export interface AnalyticsMetrics {
   taskBreakdownsGenerated: number;
   emailsSent: number;
   downloadsCompleted: number;
+  visitsCount: number;
   lastUpdated: string;
   recentTasks: string[];
 }
 
 export interface AnalyticsEvent {
-  type: 'task_breakdown' | 'email_sent' | 'download';
+  type: 'task_breakdown' | 'email_sent' | 'download' | 'visit';
   timestamp: string;
   data?: {
     taskDescription?: string;
@@ -94,6 +95,7 @@ export class MongoAnalyticsLogger {
           taskBreakdownsGenerated: metrics.taskBreakdownsGenerated || 0,
           emailsSent: metrics.emailsSent || 0,
           downloadsCompleted: metrics.downloadsCompleted || 0,
+          visitsCount: metrics.visitsCount || 0,
           lastUpdated: metrics.lastUpdated || new Date().toISOString(),
           recentTasks: metrics.recentTasks || []
         };
@@ -105,6 +107,7 @@ export class MongoAnalyticsLogger {
         taskBreakdownsGenerated: 0,
         emailsSent: 0,
         downloadsCompleted: 0,
+        visitsCount: 0,
         lastUpdated: new Date().toISOString(),
         recentTasks: []
       };
@@ -120,6 +123,7 @@ export class MongoAnalyticsLogger {
         taskBreakdownsGenerated: 0,
         emailsSent: 0,
         downloadsCompleted: 0,
+        visitsCount: 0,
         lastUpdated: new Date().toISOString(),
         recentTasks: []
       };
@@ -244,6 +248,27 @@ export class MongoAnalyticsLogger {
     }
   }
 
+  public async incrementVisits(): Promise<void> {
+    try {
+      console.log('📈 Incrementing visits...');
+      const metrics = await this.readCurrentMetrics();
+      metrics.visitsCount += 1;
+      metrics.lastUpdated = new Date().toISOString();
+      await this.writeMetrics(metrics);
+      
+      // Log the event
+      await this.logEvent({
+        type: 'visit',
+        timestamp: new Date().toISOString()
+      });
+      
+      console.log(`✅ Analytics: Visits count: ${metrics.visitsCount}`);
+    } catch (error) {
+      console.error('❌ Failed to increment visits:', error);
+      // Don't throw to avoid breaking the main functionality, but log the failure
+    }
+  }
+
   public async getCurrentMetrics(): Promise<AnalyticsMetrics> {
     try {
       return await this.readCurrentMetrics();
@@ -254,6 +279,7 @@ export class MongoAnalyticsLogger {
         taskBreakdownsGenerated: 0,
         emailsSent: 0,
         downloadsCompleted: 0,
+        visitsCount: 0,
         lastUpdated: new Date().toISOString(),
         recentTasks: []
       };

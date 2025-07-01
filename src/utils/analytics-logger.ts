@@ -5,6 +5,7 @@ export interface AnalyticsMetrics {
   taskBreakdownsGenerated: number;
   emailsSent: number;
   downloadsCompleted: number;
+  visitsCount: number;
   lastUpdated: string;
   recentTasks: string[];
 }
@@ -40,6 +41,11 @@ export class AnalyticsLogger {
           parsed.recentTasks = [];
         }
         
+        // Handle migration from old format without visitsCount
+        if (parsed.visitsCount === undefined || parsed.visitsCount === null) {
+          parsed.visitsCount = 0;
+        }
+        
         return parsed as AnalyticsMetrics;
       }
     } catch (error) {
@@ -51,6 +57,7 @@ export class AnalyticsLogger {
       taskBreakdownsGenerated: 0,
       emailsSent: 0,
       downloadsCompleted: 0,
+      visitsCount: 0,
       lastUpdated: new Date().toISOString(),
       recentTasks: []
     };
@@ -104,6 +111,15 @@ export class AnalyticsLogger {
     this.writeMetrics(metrics);
     
     console.log(`Analytics: Downloads completed: ${metrics.downloadsCompleted}`);
+  }
+
+  public incrementVisits(): void {
+    const metrics = this.readCurrentMetrics();
+    metrics.visitsCount += 1;
+    metrics.lastUpdated = new Date().toISOString();
+    this.writeMetrics(metrics);
+    
+    console.log(`Analytics: Visits count: ${metrics.visitsCount}`);
   }
 
   public getCurrentMetrics(): AnalyticsMetrics {

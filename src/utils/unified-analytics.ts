@@ -69,6 +69,18 @@ export class UnifiedAnalyticsService {
     }
   }
 
+  async incrementVisits(): Promise<void> {
+    try {
+      if (this.mongoLogger) {
+        await this.mongoLogger.incrementVisits();
+      } else if (this.fileLogger) {
+        this.fileLogger.incrementVisits();
+      }
+    } catch (error) {
+      console.error('Failed to increment visits:', error);
+    }
+  }
+
   async getCurrentMetrics() {
     try {
       if (this.mongoLogger && !this.mongoFailed) {
@@ -94,6 +106,7 @@ export class UnifiedAnalyticsService {
             taskBreakdownsGenerated: 0,
             emailsSent: 0,
             downloadsCompleted: 0,
+            visitsCount: 0,
             lastUpdated: new Date().toISOString(),
             recentTasks: [`Error: MongoDB failed - ${mongoError instanceof Error ? mongoError.message : 'Unknown error'}`]
           };
@@ -107,6 +120,7 @@ export class UnifiedAnalyticsService {
         taskBreakdownsGenerated: 0,
         emailsSent: 0,
         downloadsCompleted: 0,
+        visitsCount: 0,
         lastUpdated: new Date().toISOString(),
         recentTasks: this.mongoFailed ? ['Error: MongoDB authentication failed'] : ['No analytics logger available']
       };
@@ -116,6 +130,7 @@ export class UnifiedAnalyticsService {
         taskBreakdownsGenerated: 0,
         emailsSent: 0,
         downloadsCompleted: 0,
+        visitsCount: 0,
         lastUpdated: new Date().toISOString(),
         recentTasks: [`System error: ${error instanceof Error ? error.message : 'Unknown error'}`]
       };
