@@ -10,6 +10,7 @@ import { EmailExport } from '@/components/email-export';
 import { DownloadBreakdown } from '@/components/download-breakdown';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { useToast } from '@/hooks/use-toast';
+import { useVisitTracking } from '@/hooks/use-analytics';
 import type { TaskBreakdownFormValues, EmailExportFormValues } from '@/lib/schemas';
 import { ai } from '@/ai/openai';
 import { taskBreakdown, type TaskBreakdownOutput } from '@/ai/flows/task-breakdown';
@@ -21,6 +22,10 @@ import { Terminal } from "lucide-react";
 
 const Home: NextPage = () => {
   const { toast } = useToast();
+  
+  // Track visit when component mounts
+  useVisitTracking();
+  
   const [taskSummary, setTaskSummary] = React.useState<string | null>(null);
   const [taskBreakdownResult, setTaskBreakdownResult] = React.useState<TaskBreakdownOutput | null>(null);
   const [isLoadingBreakdown, setIsLoadingBreakdown] = React.useState(false);
@@ -84,6 +89,7 @@ const Home: NextPage = () => {
 
       setTaskBreakdownResult(breakdownOutput);
       setIsLoadingBreakdown(false);
+      
       toast({
         title: "Task Breakdown Generated!",
         description: "Your detailed plan is ready.",
