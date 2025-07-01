@@ -95,7 +95,7 @@ export class MongoAnalyticsLogger {
           taskBreakdownsGenerated: metrics.taskBreakdownsGenerated || 0,
           emailsSent: metrics.emailsSent || 0,
           downloadsCompleted: metrics.downloadsCompleted || 0,
-          visitsCount: metrics.visitsCount || 0,
+          visitsCount: (metrics.visitsCount !== undefined && metrics.visitsCount !== null) ? metrics.visitsCount : 0,
           lastUpdated: metrics.lastUpdated || new Date().toISOString(),
           recentTasks: metrics.recentTasks || []
         };
