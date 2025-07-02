@@ -35,10 +35,10 @@ interface TaskInputFormProps {
 
 const formDefaultValues: TaskBreakdownFormValues = {
   task: '',
-  targetTime: 7,
+  targetTime: undefined as any, // Start empty so user sees placeholder
   targetTimeUnit: 'days',
   planGranularity: 'weekly',
-  hoursPerDayCommitment: 2,
+  hoursPerDayCommitment: undefined as any, // Start empty so user sees placeholder
 };
 
 function usePrevious<T>(value: T): T | undefined {
@@ -62,13 +62,6 @@ export function TaskInputForm({ onSubmit, isLoading }: TaskInputFormProps): Reac
   
   const prevTargetTimeUnit = usePrevious(watchedTargetTimeUnit);
 
-  const [userDefinedDailyCommitment, setUserDefinedDailyCommitment] = React.useState(
-    formDefaultValues.hoursPerDayCommitment
-  );
-
-  React.useEffect(() => {
-  }, [watchedTargetTimeUnit, watchedTargetTime, setValue, getValues, prevTargetTimeUnit, userDefinedDailyCommitment]);
-
   // Calculate if the current inputs would exceed plan duration limits
   const calculatePlanDuration = () => {
     const targetTime = watchedTargetTime;
@@ -77,6 +70,7 @@ export function TaskInputForm({ onSubmit, isLoading }: TaskInputFormProps): Reac
     
     // Check for valid numeric values
     if (!targetTime || !targetTimeUnit || !hoursPerDay || 
+        typeof targetTime !== 'number' || typeof hoursPerDay !== 'number' ||
         isNaN(targetTime) || isNaN(hoursPerDay) || 
         targetTime <= 0 || hoursPerDay <= 0) {
       return null;
@@ -143,14 +137,36 @@ export function TaskInputForm({ onSubmit, isLoading }: TaskInputFormProps): Reac
                     <FormControl>
                       <Input 
                         type="number" 
-                        placeholder="e.g., 7" 
+                        placeholder="7" 
                         {...field} 
                         value={field.value !== undefined ? String(field.value) : ''}
-                        className="text-base" 
+                        className="text-base [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield] placeholder:opacity-40 placeholder:text-muted-foreground" 
                         min="1"
                         onChange={(e) => {
-                          const value = e.target.value === '' ? undefined : parseInt(e.target.value, 10);
-                          field.onChange(value);
+                          const value = e.target.value;
+                          if (value === '') {
+                            field.onChange(undefined);
+                          } else {
+                            const numValue = parseInt(value, 10);
+                            if (!isNaN(numValue)) {
+                              field.onChange(numValue);
+                            }
+                          }
+                        }}
+                        onKeyDown={(e) => {
+                          // Allow: backspace, delete, tab, escape, enter, decimal point, and arrow keys
+                          if ([8, 9, 27, 13, 46, 37, 38, 39, 40].indexOf(e.keyCode) !== -1 ||
+                              // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+                              (e.ctrlKey === true && [65, 67, 86, 88].indexOf(e.keyCode) !== -1)) {
+                            return;
+                          }
+                          // Ensure that it is a number and stop the keypress
+                          if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+                            e.preventDefault();
+                          }
+                        }}
+                        onFocus={(e) => {
+                          e.target.select(); // Select all text when focused
                         }}
                       />
                     </FormControl>
@@ -202,17 +218,36 @@ export function TaskInputForm({ onSubmit, isLoading }: TaskInputFormProps): Reac
                     <FormControl>
                       <Input 
                         type="number" 
-                        placeholder="e.g., 2" 
+                        placeholder="2" 
                         {...field}
                         value={field.value !== undefined ? String(field.value) : ''}
-                        className="text-base"
+                        className="text-base [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield] placeholder:opacity-40 placeholder:text-muted-foreground"
                         min="1"
                         onChange={(e) => {
-                          const value = e.target.value === '' ? undefined : parseInt(e.target.value, 10);
-                          field.onChange(value); // Propagate change to RHF
-                          if (value && !isNaN(value)) {
-                            setUserDefinedDailyCommitment(value);
+                          const value = e.target.value;
+                          if (value === '') {
+                            field.onChange(undefined);
+                          } else {
+                            const numValue = parseInt(value, 10);
+                            if (!isNaN(numValue)) {
+                              field.onChange(numValue);
+                            }
                           }
+                        }}
+                        onKeyDown={(e) => {
+                          // Allow: backspace, delete, tab, escape, enter, decimal point, and arrow keys
+                          if ([8, 9, 27, 13, 46, 37, 38, 39, 40].indexOf(e.keyCode) !== -1 ||
+                              // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+                              (e.ctrlKey === true && [65, 67, 86, 88].indexOf(e.keyCode) !== -1)) {
+                            return;
+                          }
+                          // Ensure that it is a number and stop the keypress
+                          if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+                            e.preventDefault();
+                          }
+                        }}
+                        onFocus={(e) => {
+                          e.target.select(); // Select all text when focused
                         }}
                       />
                     </FormControl>
@@ -257,26 +292,6 @@ export function TaskInputForm({ onSubmit, isLoading }: TaskInputFormProps): Reac
                   Consider if this timeline works for your goals.
                 </AlertDescription>
               </Alert>
-            )}
-            
-            {isNearLimit && !isOverLimit && (
-              <div className="rounded-md bg-yellow-50 p-4">
-                <div className="flex">
-                  <div className="flex-shrink-0">
-                    <svg className="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12.79V22H3V2h9.21M21 12.79L12.79 3M3 12.79L11.21 21" />
-                    </svg>
-                  </div>
-                  <div className="ml-3">
-                    <p className="text-sm font-medium text-yellow-800">
-                      Your plan is approaching the maximum duration limit of 52 weeks.
-                    </p>
-                    <p className="mt-1 text-sm text-yellow-600">
-                      Consider reviewing your task breakdown and commitments.
-                    </p>
-                  </div>
-                </div>
-              </div>
             )}
             
             <Button type="submit" disabled={isLoading || isOverLimit} className="w-full text-lg py-6">
