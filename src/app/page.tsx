@@ -9,15 +9,20 @@ import { TaskBreakdownDisplay } from '@/components/task-breakdown-display';
 import { EmailExport } from '@/components/email-export';
 import { DownloadBreakdown } from '@/components/download-breakdown';
 import { ErrorBoundary } from '@/components/error-boundary';
+import { UserDashboard } from '@/components/user-dashboard';
 import { useToast } from '@/hooks/use-toast';
-import { useVisitTracking } from '@/hooks/use-analytics';
+import { useVisitTracking, useUserAnalytics } from '@/hooks/use-analytics';
 import type { TaskBreakdownFormValues, EmailExportFormValues } from '@/lib/schemas';
 import { ai } from '@/ai/openai';
 import { taskBreakdown, type TaskBreakdownOutput } from '@/ai/flows/task-breakdown';
 import { logger } from '@/utils/client-logger';
 import { summarizeTaskBreakdown } from '@/ai/flows/task-summary';
+import { EnhancedTaskAI, type TaskAnalysis, type PersonalizedInsight } from '@/ai/enhanced-task-ai';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Terminal } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Terminal, Lightbulb, TrendingUp, AlertTriangle } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 
 const Home: NextPage = () => {
@@ -26,13 +31,26 @@ const Home: NextPage = () => {
   // Track visit when component mounts
   useVisitTracking();
   
+  // User analytics hook
+  const { 
+    analytics: userAnalytics, 
+    isLoading: isLoadingUserAnalytics, 
+    trackTaskBreakdown, 
+    trackDownload, 
+    updatePreferences, 
+    clearUserData 
+  } = useUserAnalytics();
+  
   const [taskSummary, setTaskSummary] = React.useState<string | null>(null);
   const [taskBreakdownResult, setTaskBreakdownResult] = React.useState<TaskBreakdownOutput | null>(null);
   const [isLoadingBreakdown, setIsLoadingBreakdown] = React.useState(false);
   const [isLoadingSummary, setIsLoadingSummary] = React.useState(false);
   const [isSubmittingEmail, setIsSubmittingEmail] = React.useState(false);
   const [aiError, setAiError] = React.useState<string | null>(null);
+  const [taskAnalysis, setTaskAnalysis] = React.useState<TaskAnalysis | null>(null);
+  const [personalizedInsights, setPersonalizedInsights] = React.useState<PersonalizedInsight[]>([]);
 
+  // Track task breakdown in user analytics
   const handleTaskSubmit = async (values: TaskBreakdownFormValues) => {
     await logger.logUserAction('Task Submission', values);
     setIsLoadingBreakdown(true);
@@ -90,11 +108,36 @@ const Home: NextPage = () => {
       setTaskBreakdownResult(breakdownOutput);
       setIsLoadingBreakdown(false);
       
+      // Track task breakdown in user analytics
+      trackTaskBreakdown(values.task);
+      
       toast({
         title: "Task Breakdown Generated!",
         description: "Your detailed plan is ready.",
         variant: "default",
       });
+
+      // Generate enhanced AI analysis
+      try {
+        const analysis = await EnhancedTaskAI.analyzeTaskBreakdown(values, breakdownOutput);
+        setTaskAnalysis(analysis);
+
+        // Generate personalized insights if we have user analytics
+        if (userAnalytics) {
+          const insights = await EnhancedTaskAI.generatePersonalizedInsights(
+            {
+              taskBreakdowns: userAnalytics.taskBreakdownsGenerated,
+              visits: userAnalytics.visitsCount,
+              downloads: userAnalytics.downloadsCompleted
+            },
+            values
+          );
+          setPersonalizedInsights(insights);
+        }
+      } catch (analysisError) {
+        console.error('Enhanced AI analysis failed:', analysisError);
+        // Don't block the main flow if analysis fails
+      }
 
       // Generate summary separately - don't let summary failure affect breakdown display
       try {
@@ -225,47 +268,172 @@ const Home: NextPage = () => {
           </p>
         </header>
 
-        <main className="w-full max-w-3xl space-y-12">
-          <ErrorBoundary>
-            <TaskInputForm onSubmit={handleTaskSubmit} isLoading={isLoadingBreakdown || isLoadingSummary} />
-          </ErrorBoundary>
+        <main className="w-full max-w-4xl space-y-12">
+          <Tabs defaultValue="planner" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="planner">Task Planner</TabsTrigger>
+              <TabsTrigger value="dashboard">Dashboard & Insights</TabsTrigger>
+            </TabsList>
 
-          {aiError && (
-             <Alert variant="destructive" className="shadow-md">
-              <Terminal className="h-4 w-4" />
-              <AlertTitle>AI Processing Error</AlertTitle>
-              <AlertDescription className="whitespace-pre-line">{aiError}</AlertDescription>
-            </Alert>
-          )}
+            <TabsContent value="planner" className="space-y-12">
+              <ErrorBoundary>
+                <TaskInputForm onSubmit={handleTaskSubmit} isLoading={isLoadingBreakdown || isLoadingSummary} />
+              </ErrorBoundary>
 
-          <ErrorBoundary>
-            {isLoadingBreakdown || isLoadingSummary ? (
-               <TaskBreakdownDisplay
-                 summary={null}
-                 breakdown={null}
-                 isLoadingSummary={isLoadingSummary}
-                 isLoadingBreakdown={isLoadingBreakdown}
-               />
-             ) : taskBreakdownResult ? (
-               <TaskBreakdownDisplay
-                 summary={taskSummary}
-                 breakdown={taskBreakdownResult.breakdown}
-                 isLoadingSummary={isLoadingSummary}
-                 isLoadingBreakdown={isLoadingBreakdown}
-               />
-             ) : null}
-          </ErrorBoundary>
+              {aiError && (
+                 <Alert variant="destructive" className="shadow-md">
+                  <Terminal className="h-4 w-4" />
+                  <AlertTitle>AI Processing Error</AlertTitle>
+                  <AlertDescription className="whitespace-pre-line">{aiError}</AlertDescription>
+                </Alert>
+              )}
 
-          <ErrorBoundary>
-            {taskBreakdownResult && !isLoadingBreakdown && !isLoadingSummary && (
-              <div className="space-y-6">
-                <EmailExport onSubmitEmail={handleEmailSubmit} isExporting={isSubmittingEmail} />
-                <DownloadBreakdown breakdown={taskBreakdownResult?.breakdown ?? []} />
-              </div>
-            )}
-          </ErrorBoundary>
+              {/* Enhanced AI Insights */}
+              {(taskAnalysis || personalizedInsights.length > 0) && (
+                <div className="space-y-6">
+                  {personalizedInsights.length > 0 && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Lightbulb className="h-5 w-5 text-yellow-500" />
+                          Personalized Insights
+                        </CardTitle>
+                        <CardDescription>AI-powered recommendations based on your activity</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {personalizedInsights.map((insight, index) => (
+                          <div
+                            key={index}
+                            className={`p-4 border rounded-lg ${
+                              insight.type === 'warning' ? 'border-yellow-200 bg-yellow-50' :
+                              insight.type === 'encouragement' ? 'border-green-200 bg-green-50' :
+                              insight.type === 'optimization' ? 'border-blue-200 bg-blue-50' :
+                              'border-gray-200 bg-gray-50'
+                            }`}
+                          >
+                            <div className="flex items-start gap-2">
+                              {insight.type === 'warning' && <AlertTriangle className="h-4 w-4 text-yellow-600 mt-0.5" />}
+                              {insight.type === 'encouragement' && <TrendingUp className="h-4 w-4 text-green-600 mt-0.5" />}
+                              {insight.type === 'optimization' && <Lightbulb className="h-4 w-4 text-blue-600 mt-0.5" />}
+                              <div className="flex-1">
+                                <h4 className="font-medium text-sm">{insight.title}</h4>
+                                <p className="text-sm text-muted-foreground mt-1">{insight.description}</p>
+                                <Badge variant="outline" className="mt-2 text-xs">
+                                  {insight.priority} priority
+                                </Badge>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {taskAnalysis && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Terminal className="h-5 w-5" />
+                          Task Analysis
+                        </CardTitle>
+                        <CardDescription>
+                          Complexity: <Badge variant="outline">{taskAnalysis.complexity}</Badge>
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {taskAnalysis.recommendations.length > 0 && (
+                          <div>
+                            <h4 className="font-medium text-sm mb-2">Recommendations</h4>
+                            <ul className="space-y-1 text-sm text-muted-foreground">
+                              {taskAnalysis.recommendations.map((rec, index) => (
+                                <li key={index} className="flex items-start gap-2">
+                                  <span className="text-primary">•</span>
+                                  {rec}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        {taskAnalysis.timeOptimizationOpportunities.length > 0 && (
+                          <div>
+                            <h4 className="font-medium text-sm mb-2">Time Optimization</h4>
+                            <ul className="space-y-1 text-sm text-muted-foreground">
+                              {taskAnalysis.timeOptimizationOpportunities.map((opp, index) => (
+                                <li key={index} className="flex items-start gap-2">
+                                  <span className="text-blue-500">•</span>
+                                  {opp}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
+              )}
+
+              <ErrorBoundary>
+                {isLoadingBreakdown || isLoadingSummary ? (
+                   <TaskBreakdownDisplay
+                     summary={null}
+                     breakdown={null}
+                     isLoadingSummary={isLoadingSummary}
+                     isLoadingBreakdown={isLoadingBreakdown}
+                   />
+                 ) : taskBreakdownResult ? (
+                   <TaskBreakdownDisplay
+                     summary={taskSummary}
+                     breakdown={taskBreakdownResult.breakdown}
+                     isLoadingSummary={isLoadingSummary}
+                     isLoadingBreakdown={isLoadingBreakdown}
+                   />
+                 ) : null}
+              </ErrorBoundary>
+
+              <ErrorBoundary>
+                {taskBreakdownResult && !isLoadingBreakdown && !isLoadingSummary && (
+                  <div className="space-y-6">
+                    <EmailExport onSubmitEmail={handleEmailSubmit} isExporting={isSubmittingEmail} />
+                    <DownloadBreakdown 
+                      breakdown={taskBreakdownResult?.breakdown ?? []} 
+                      onDownload={trackDownload}
+                    />
+                  </div>
+                )}
+              </ErrorBoundary>
+            </TabsContent>
+
+            <TabsContent value="dashboard" className="space-y-6">
+              <ErrorBoundary>
+                {userAnalytics ? (
+                  <UserDashboard 
+                    analytics={userAnalytics} 
+                    isLoading={isLoadingUserAnalytics}
+                    onClearData={clearUserData}
+                    onUpdatePreferences={updatePreferences}
+                  />
+                ) : (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Dashboard</CardTitle>
+                      <CardDescription>Loading your activity data...</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="animate-pulse space-y-4">
+                        <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                        <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                        <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </ErrorBoundary>
+            </TabsContent>
+          </Tabs>
         </main>
-        <footer className="mt-16 w-full max-w-3xl border-t pt-8 text-center">
+        <footer className="mt-16 w-full max-w-4xl border-t pt-8 text-center">
           <p className="text-sm text-muted-foreground">
             &copy; {new Date().getFullYear()} Task Breakdown Expert. Powered by AI.
           </p>

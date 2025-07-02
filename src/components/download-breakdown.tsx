@@ -13,9 +13,10 @@ import { format } from 'date-fns';
 
 interface DownloadBreakdownProps {
   breakdown: TaskBreakdownOutput['breakdown'] | null;
+  onDownload?: () => void;
 }
 
-export function DownloadBreakdown({ breakdown }: DownloadBreakdownProps): React.JSX.Element | null {
+export function DownloadBreakdown({ breakdown, onDownload }: DownloadBreakdownProps): React.JSX.Element | null {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = React.useState(false);
 
@@ -32,6 +33,9 @@ export function DownloadBreakdown({ breakdown }: DownloadBreakdownProps): React.
         },
         body: JSON.stringify({ downloadType }),
       });
+      
+      // Track in user analytics if callback provided
+      onDownload?.();
     } catch (error) {
       console.error('Failed to track download:', error);
       // Don't block the download if tracking fails
