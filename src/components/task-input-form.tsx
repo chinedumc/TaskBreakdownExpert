@@ -114,7 +114,7 @@ export function TaskInputForm({ onSubmit, isLoading }: TaskInputFormProps): Reac
                     Task or Goal
                   </FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., Learn Next.js and build projects each step of the way" {...field} className="text-base"/>
+                    <Input placeholder="e.g., Learn Next.js and build projects each step of the way" {...field} className="text-base placeholder:opacity-40 placeholder:text-muted-foreground"/>
                   </FormControl>
                   <FormDescription>
                     What do you want to achieve? Be specific for better weekly planning results.
