@@ -43,10 +43,31 @@ export class EnhancedTaskAI {
     const averageTasksPerWeek = totalTasks / totalWeeks;
     const planDurationMonths = Math.ceil(totalWeeks / 4);
 
-    // Determine complexity based on multiple factors
+    // Determine complexity based on multiple factors including skill level
     let complexity: 'low' | 'medium' | 'high' = 'medium';
-    if (totalWeeks <= 4 && averageTasksPerWeek <= 15) complexity = 'low';
-    else if (totalWeeks > 26 || averageTasksPerWeek > 25) complexity = 'high';
+    
+    // Base complexity on task structure
+    const baseComplexity = (() => {
+      if (totalWeeks <= 4 && averageTasksPerWeek <= 15) return 'low';
+      if (totalWeeks > 26 || averageTasksPerWeek > 25) return 'high';
+      return 'medium';
+    })();
+    
+    // Adjust complexity based on user skill level
+    if (userPreferences?.skillLevel === 'beginner') {
+      // For beginners, even medium tasks can feel high complexity
+      if (baseComplexity === 'medium') complexity = 'high';
+      else if (baseComplexity === 'low') complexity = 'medium';
+      else complexity = 'high';
+    } else if (userPreferences?.skillLevel === 'advanced') {
+      // For advanced users, reduce perceived complexity
+      if (baseComplexity === 'high') complexity = 'medium';
+      else if (baseComplexity === 'medium') complexity = 'low';
+      else complexity = 'low';
+    } else {
+      // Intermediate users use base complexity
+      complexity = baseComplexity;
+    }
 
     // Generate time optimization opportunities
     const timeOptimizationOpportunities: string[] = [];
