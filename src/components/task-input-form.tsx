@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { BrainCircuit, CalendarDays, ClipboardList, Clock, Hourglass, Loader2, Sparkles, CheckSquare, AlertTriangle } from 'lucide-react';
+import { BrainCircuit, CalendarDays, ClipboardList, Clock, Hourglass, Loader2, Sparkles, CheckSquare, AlertTriangle, Star } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -39,6 +39,7 @@ const formDefaultValues: TaskBreakdownFormValues = {
   targetTimeUnit: 'days',
   planGranularity: 'weekly',
   hoursPerDayCommitment: undefined as any, // Start empty so user sees placeholder
+  skillLevel: 'beginner', // Default to beginner
 };
 
 function usePrevious<T>(value: T): T | undefined {
@@ -118,6 +119,35 @@ export function TaskInputForm({ onSubmit, isLoading }: TaskInputFormProps): Reac
                   </FormControl>
                   <FormDescription>
                     What do you want to achieve? Be specific for better weekly planning results.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="skillLevel"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center text-lg">
+                    <Star className="mr-2 h-5 w-5" />
+                    Skill Level (Optional)
+                  </FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger className="text-base">
+                        <SelectValue placeholder="Select your skill level" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="beginner">Beginner - New to this area</SelectItem>
+                      <SelectItem value="intermediate">Intermediate - Some experience</SelectItem>
+                      <SelectItem value="advanced">Advanced - Experienced practitioner</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>
+                    Your skill level helps us tailor recommendations. Defaults to Beginner if not selected.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

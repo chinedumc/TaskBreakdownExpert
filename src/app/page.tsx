@@ -119,7 +119,15 @@ const Home: NextPage = () => {
 
       // Generate enhanced AI analysis
       try {
-        const analysis = await EnhancedTaskAI.analyzeTaskBreakdown(values, breakdownOutput);
+        // Create user preferences from form values
+        const userPreferences = {
+          skillLevel: values.skillLevel || 'beginner',
+          preferredTaskSize: 'medium' as const,
+          workingHours: 'flexible' as const,
+          focusAreas: []
+        };
+        
+        const analysis = await EnhancedTaskAI.analyzeTaskBreakdown(values, breakdownOutput, userPreferences);
         setTaskAnalysis(analysis);
 
         // Generate personalized insights if we have user analytics
@@ -174,6 +182,12 @@ const Home: NextPage = () => {
         userFriendlyMessage = "AI response formatting error. Please try again - this is usually temporary.";
       } else if (errorMessage.includes("token") || errorMessage.includes("limit")) {
         userFriendlyMessage = "Your request is too complex for the AI to process. Please try breaking it into smaller goals or reducing the time frame.";
+      } else if (errorMessage.includes("rate") || errorMessage.includes("429") || errorMessage.includes("high demand") || errorMessage.includes("upstream")) {
+        userFriendlyMessage = "The AI service is currently experiencing high demand. Please wait a moment and try again. This is usually temporary.";
+      } else if (errorMessage.includes("503") || errorMessage.includes("502") || errorMessage.includes("504") || errorMessage.includes("temporarily unavailable")) {
+        userFriendlyMessage = "The AI service is temporarily unavailable. Please try again in a few minutes.";
+      } else if (errorMessage.includes("network") || errorMessage.includes("connection")) {
+        userFriendlyMessage = "Network connection issue. Please check your internet connection and try again.";
       }
       
       setAiError(userFriendlyMessage);
@@ -412,7 +426,6 @@ const Home: NextPage = () => {
                     analytics={userAnalytics} 
                     isLoading={isLoadingUserAnalytics}
                     onClearData={clearUserData}
-                    onUpdatePreferences={updatePreferences}
                   />
                 ) : (
                   <Card>

@@ -4,17 +4,16 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Calendar, TrendingUp, Target, Clock, User, BarChart3, Trophy, Settings, Trash2 } from 'lucide-react';
+import { Calendar, TrendingUp, Target, Clock, User, BarChart3, Trophy, Trash2 } from 'lucide-react';
 import type { UserAnalytics } from '@/utils/user-session';
 
 interface UserDashboardProps {
   analytics: UserAnalytics;
   isLoading?: boolean;
   onClearData?: () => void;
-  onUpdatePreferences?: (preferences: Partial<UserAnalytics['preferences']>) => void;
 }
 
-export function UserDashboard({ analytics, isLoading = false, onClearData, onUpdatePreferences }: UserDashboardProps) {
+export function UserDashboard({ analytics, isLoading = false, onClearData }: UserDashboardProps) {
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -60,11 +59,10 @@ export function UserDashboard({ analytics, isLoading = false, onClearData, onUpd
       </div>
 
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="activity">Activity</TabsTrigger>
           <TabsTrigger value="insights">Insights</TabsTrigger>
-          <TabsTrigger value="preferences">Preferences</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
@@ -181,141 +179,6 @@ export function UserDashboard({ analytics, isLoading = false, onClearData, onUpd
                 <p className="text-sm text-yellow-600 mt-1">
                   Consider setting aside dedicated time each week to review and update your learning plans.
                 </p>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="preferences" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Settings className="h-5 w-5" />
-                User Preferences
-              </CardTitle>
-              <CardDescription>Customize your learning experience</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-3">
-                <h4 className="font-medium">Default Settings</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium">Preferred Time Unit</label>
-                    <select 
-                      className="w-full mt-1 p-2 border rounded-md bg-background"
-                      value={analytics.preferences.defaultTimeUnit}
-                      onChange={(e) => {
-                        onUpdatePreferences?.({
-                          defaultTimeUnit: e.target.value as 'days' | 'months'
-                        });
-                      }}
-                    >
-                      <option value="days">Days</option>
-                      <option value="months">Months</option>
-                    </select>
-                  </div>
-                  
-                  <div>
-                    <label className="text-sm font-medium">Default Daily Commitment (hours)</label>
-                    <input 
-                      type="number" 
-                      min="1" 
-                      max="12"
-                      className="w-full mt-1 p-2 border rounded-md bg-background"
-                      value={analytics.preferences.defaultCommitment}
-                      onChange={(e) => {
-                        const value = parseInt(e.target.value);
-                        if (!isNaN(value) && value >= 1 && value <= 12) {
-                          onUpdatePreferences?.({
-                            defaultCommitment: value
-                          });
-                        }
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <h4 className="font-medium">Skill Level</h4>
-                <div className="flex gap-2">
-                  {(['beginner', 'intermediate', 'advanced'] as const).map((level) => (
-                    <Button
-                      key={level}
-                      variant={analytics.preferences.skillLevel === level ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => {
-                        onUpdatePreferences?.({
-                          skillLevel: level
-                        });
-                      }}
-                    >
-                      {level.charAt(0).toUpperCase() + level.slice(1)}
-                    </Button>
-                  ))}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  This helps us provide better recommendations for your learning plans.
-                </p>
-              </div>
-
-              <div className="space-y-3">
-                <h4 className="font-medium">Learning Summary</h4>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                  <div className="p-3 border rounded-lg bg-muted/30">
-                    <div className="text-lg font-semibold">{analytics.visitsCount}</div>
-                    <div className="text-xs text-muted-foreground">Total Visits</div>
-                  </div>
-                  <div className="p-3 border rounded-lg bg-muted/30">
-                    <div className="text-lg font-semibold">{analytics.taskBreakdownsGenerated}</div>
-                    <div className="text-xs text-muted-foreground">Plans Created</div>
-                  </div>
-                  <div className="p-3 border rounded-lg bg-muted/30">
-                    <div className="text-lg font-semibold">{analytics.downloadsCompleted}</div>
-                    <div className="text-xs text-muted-foreground">Downloads</div>
-                  </div>
-                  <div className="p-3 border rounded-lg bg-muted/30">
-                    <div className="text-lg font-semibold">
-                      {Math.round((analytics.downloadsCompleted / Math.max(analytics.taskBreakdownsGenerated, 1)) * 100)}%
-                    </div>
-                    <div className="text-xs text-muted-foreground">Follow-through</div>
-                  </div>
-                </div>
-              </div>
-
-              {analytics.completedTasks && analytics.completedTasks.length > 0 && (
-                <div className="space-y-3">
-                  <h4 className="font-medium">Recent Learning Goals</h4>
-                  <div className="space-y-2">
-                    {analytics.completedTasks.slice(0, 5).map((task, index) => (
-                      <div key={index} className="p-2 bg-muted/30 rounded text-sm">
-                        {task}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <div className="pt-4 border-t">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="font-medium text-sm">Privacy & Data</h4>
-                    <p className="text-xs text-muted-foreground">
-                      Your data is stored locally in your browser. User ID: {analytics.userId.slice(-8)}
-                    </p>
-                  </div>
-                  {onClearData && (
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={onClearData}
-                      className="text-red-600 hover:text-red-700"
-                    >
-                      <Trash2 className="h-3 w-3 mr-1" />
-                      Clear All Data
-                    </Button>
-                  )}
-                </div>
               </div>
             </CardContent>
           </Card>

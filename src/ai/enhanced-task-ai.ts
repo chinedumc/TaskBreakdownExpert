@@ -138,12 +138,24 @@ export class EnhancedTaskAI {
 
     // Success patterns
     if (userHistory.downloads / Math.max(userHistory.taskBreakdowns, 1) > 0.8) {
+      // Adjust messaging and priority based on skill level
+      let description = 'You download most of your plans - that shows real commitment to following through!';
+      let priority: 'low' | 'medium' | 'high' = 'medium';
+      
+      if (userPreferences?.skillLevel === 'beginner') {
+        description = 'Excellent! You\'re downloading your plans consistently. This habit is key to success for new learners.';
+        priority = 'high';
+      } else if (userPreferences?.skillLevel === 'advanced') {
+        description = 'Strong execution pattern! Your consistent follow-through will accelerate your advanced learning goals.';
+        priority = 'medium';
+      }
+      
       insights.push({
         type: 'encouragement',
         title: 'Implementation Champion!',
-        description: 'You download most of your plans - that shows real commitment to following through!',
+        description,
         actionable: false,
-        priority: 'medium'
+        priority
       });
     }
 
@@ -160,12 +172,24 @@ export class EnhancedTaskAI {
 
     // Optimization suggestions
     if (currentTask.targetTimeUnit === 'months' && currentTask.targetTime > 3) {
+      // Determine priority based on skill level
+      let priority: 'low' | 'medium' | 'high' = 'medium';
+      let description = 'Long-term goals benefit from monthly milestones. Consider setting 30-day checkpoints.';
+      
+      if (userPreferences?.skillLevel === 'beginner') {
+        priority = 'high';
+        description = 'For beginners, breaking long-term goals into monthly milestones is crucial for maintaining motivation and tracking progress.';
+      } else if (userPreferences?.skillLevel === 'advanced') {
+        priority = 'low';
+        description = 'Consider quarterly milestones with aggressive weekly targets to maximize your learning velocity.';
+      }
+      
       insights.push({
         type: 'optimization',
         title: 'Break It Down Further',
-        description: 'Long-term goals benefit from monthly milestones. Consider setting 30-day checkpoints.',
+        description,
         actionable: true,
-        priority: 'medium'
+        priority
       });
     }
 
