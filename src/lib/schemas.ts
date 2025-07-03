@@ -13,6 +13,9 @@ export const TaskBreakdownFormSchema = z.object({
     .positive({ message: "Daily commitment must be a positive whole number." })
     .min(1, { message: "Please commit at least 1 hour per day." })
     .max(24, { message: "Daily commitment cannot exceed 24 hours." }),
+  skillLevel: z.enum(['beginner', 'intermediate', 'advanced'], {
+    errorMap: () => ({ message: "Please select a skill level." }),
+  }).default('beginner').optional(),
 }).refine((data) => {
   // If using days, must be at least 7 days to form complete weeks
   if (data.targetTimeUnit === 'days' && data.targetTime < 7) {

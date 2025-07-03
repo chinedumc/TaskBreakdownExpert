@@ -2,8 +2,7 @@
 "use client";
 
 import * as React from 'react';
-import type { ReactNode } from 'react';
-import { DownloadCloud, FileText, FileDown } from 'lucide-react';
+import { FileText, FileDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import type { TaskBreakdownOutput } from '@/ai/flows/task-breakdown';
@@ -13,9 +12,10 @@ import { format } from 'date-fns';
 
 interface DownloadBreakdownProps {
   breakdown: TaskBreakdownOutput['breakdown'] | null;
+  onDownload?: () => void;
 }
 
-export function DownloadBreakdown({ breakdown }: DownloadBreakdownProps): React.JSX.Element | null {
+export function DownloadBreakdown({ breakdown, onDownload }: DownloadBreakdownProps): React.JSX.Element | null {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = React.useState(false);
 
@@ -32,6 +32,8 @@ export function DownloadBreakdown({ breakdown }: DownloadBreakdownProps): React.
         },
         body: JSON.stringify({ downloadType }),
       });
+      
+      onDownload?.();
     } catch (error) {
       console.error('Failed to track download:', error);
       // Don't block the download if tracking fails
@@ -86,8 +88,8 @@ export function DownloadBreakdown({ breakdown }: DownloadBreakdownProps): React.
       };
       
       let pageNum = 1;
-      let { page, startY } = addNewPage(pageNum);
-      let currentY = startY;
+      let { page, startY: initialStartY } = addNewPage(pageNum);
+      let currentY = initialStartY;
       
       // Pre-load fonts
       const boldFont = await pdfDoc.embedFont('Helvetica-Bold');

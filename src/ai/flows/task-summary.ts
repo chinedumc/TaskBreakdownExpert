@@ -11,18 +11,19 @@
 import { z } from 'zod';
 import { ai, DEFAULT_MODEL } from '@/ai/openai';
 
-const SummarizeTaskBreakdownInputSchema = z.object({
-  taskBreakdown: z
-    .string()
-    .describe('The detailed weekly breakdown of the task with daily learning objectives.'),
-});
-export type SummarizeTaskBreakdownInput = z.infer<typeof SummarizeTaskBreakdownInputSchema>;
+export type SummarizeTaskBreakdownInput = {
+  taskBreakdown: string;
+};
+
+export type SummarizeTaskBreakdownOutput = {
+  summary: string;
+  progress: string;
+};
 
 const SummarizeTaskBreakdownOutputSchema = z.object({
   summary: z.string().describe('A short, one-sentence summary of the weekly learning plan breakdown.'),
   progress: z.string().describe('A short sentence summarizing the summary generation.'),
 });
-export type SummarizeTaskBreakdownOutput = z.infer<typeof SummarizeTaskBreakdownOutputSchema>;
 
 export async function summarizeTaskBreakdown(input: SummarizeTaskBreakdownInput): Promise<SummarizeTaskBreakdownOutput> {
   const completion = await ai.chat.completions.create({

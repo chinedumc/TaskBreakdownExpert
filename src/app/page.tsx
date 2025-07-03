@@ -10,9 +10,7 @@ import { EmailExport } from '@/components/email-export';
 import { DownloadBreakdown } from '@/components/download-breakdown';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { useToast } from '@/hooks/use-toast';
-import { useVisitTracking } from '@/hooks/use-analytics';
 import type { TaskBreakdownFormValues, EmailExportFormValues } from '@/lib/schemas';
-import { ai } from '@/ai/openai';
 import { taskBreakdown, type TaskBreakdownOutput } from '@/ai/flows/task-breakdown';
 import { logger } from '@/utils/client-logger';
 import { summarizeTaskBreakdown } from '@/ai/flows/task-summary';
@@ -22,9 +20,6 @@ import { Terminal } from "lucide-react";
 
 const Home: NextPage = () => {
   const { toast } = useToast();
-  
-  // Track visit when component mounts
-  useVisitTracking();
   
   const [taskSummary, setTaskSummary] = React.useState<string | null>(null);
   const [taskBreakdownResult, setTaskBreakdownResult] = React.useState<TaskBreakdownOutput | null>(null);
@@ -131,6 +126,12 @@ const Home: NextPage = () => {
         userFriendlyMessage = "AI response formatting error. Please try again - this is usually temporary.";
       } else if (errorMessage.includes("token") || errorMessage.includes("limit")) {
         userFriendlyMessage = "Your request is too complex for the AI to process. Please try breaking it into smaller goals or reducing the time frame.";
+      } else if (errorMessage.includes("rate") || errorMessage.includes("429") || errorMessage.includes("high demand") || errorMessage.includes("upstream")) {
+        userFriendlyMessage = "The AI service is currently experiencing high demand. Please wait a moment and try again. This is usually temporary.";
+      } else if (errorMessage.includes("503") || errorMessage.includes("502") || errorMessage.includes("504") || errorMessage.includes("temporarily unavailable")) {
+        userFriendlyMessage = "The AI service is temporarily unavailable. Please try again in a few minutes.";
+      } else if (errorMessage.includes("network") || errorMessage.includes("connection")) {
+        userFriendlyMessage = "Network connection issue. Please check your internet connection and try again.";
       }
       
       setAiError(userFriendlyMessage);
@@ -225,7 +226,7 @@ const Home: NextPage = () => {
           </p>
         </header>
 
-        <main className="w-full max-w-3xl space-y-12">
+        <main className="w-full max-w-4xl space-y-12">
           <ErrorBoundary>
             <TaskInputForm onSubmit={handleTaskSubmit} isLoading={isLoadingBreakdown || isLoadingSummary} />
           </ErrorBoundary>
@@ -259,13 +260,16 @@ const Home: NextPage = () => {
           <ErrorBoundary>
             {taskBreakdownResult && !isLoadingBreakdown && !isLoadingSummary && (
               <div className="space-y-6">
-                <EmailExport onSubmitEmail={handleEmailSubmit} isExporting={isSubmittingEmail} />
-                <DownloadBreakdown breakdown={taskBreakdownResult?.breakdown ?? []} />
+                <EmailExport onSubmitEmail={handleEmailSubmit} />
+                <DownloadBreakdown 
+                  breakdown={taskBreakdownResult?.breakdown ?? []} 
+                  onDownload={() => {}} 
+                />
               </div>
             )}
           </ErrorBoundary>
         </main>
-        <footer className="mt-16 w-full max-w-3xl border-t pt-8 text-center">
+        <footer className="mt-16 w-full max-w-4xl border-t pt-8 text-center">
           <p className="text-sm text-muted-foreground">
             &copy; {new Date().getFullYear()} Task Breakdown Expert. Powered by AI.
           </p>

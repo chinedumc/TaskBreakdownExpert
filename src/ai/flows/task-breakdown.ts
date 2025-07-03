@@ -11,19 +11,16 @@
 
 import { ai, DEFAULT_MODEL } from '@/ai/openai';
 import { ServerLogger } from '@/utils/logger';
-import { analyticsService } from '@/utils/unified-analytics';
 const serverLogger = new ServerLogger();
 import { z } from 'zod';
 
-const TaskBreakdownInputSchema = z.object({
-  task: z.string().describe('The task or goal to be achieved.'),
-  targetTime: z.number().describe('The numeric value of the total estimated effort for the task (e.g., 7).'),
-  targetTimeUnit: z.enum(['days', 'months']).describe('The unit for the total estimated effort (e.g., days, months).'),
-  planGranularity: z.enum(['weekly']).describe('The planning granularity, fixed to weekly.'),
-  hoursPerDayCommitment: z.number().min(1).max(24).describe('The number of hours the user commits to working on the task per day.'),
-});
-
-export type TaskBreakdownInput = z.infer<typeof TaskBreakdownInputSchema>;
+export type TaskBreakdownInput = {
+  task: string;
+  targetTime: number;
+  targetTimeUnit: 'days' | 'months';
+  planGranularity: 'weekly';
+  hoursPerDayCommitment: number;
+};
 
 const TaskBreakdownOutputSchema = z.object({
   breakdown: z.array(
@@ -36,12 +33,17 @@ const TaskBreakdownOutputSchema = z.object({
 
 export type TaskBreakdownOutput = z.infer<typeof TaskBreakdownOutputSchema>;
 
+// Type guard to check if parsed result has the expected structure
+function hasBreakdownProperty(obj: unknown): obj is { breakdown: unknown } {
+  return typeof obj === 'object' && obj !== null && 'breakdown' in obj;
+}
+
 // Function to clean and validate JSON response with advanced recovery
-function cleanAndParseJSON(jsonString: string): any {
+function cleanAndParseJSON(jsonString: string): unknown {
   try {
     // First, try to parse as-is
     return JSON.parse(jsonString);
-  } catch (error) {
+  } catch {
     console.log('Initial JSON parse failed, attempting advanced cleaning...');
     
     // Clean common JSON issues
@@ -57,7 +59,7 @@ function cleanAndParseJSON(jsonString: string): any {
     
     // Try to find and extract just the JSON object
     const jsonStart = cleaned.indexOf('{');
-    let jsonEnd = cleaned.lastIndexOf('}');
+    const jsonEnd = cleaned.lastIndexOf('}');
     
     if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
       cleaned = cleaned.substring(jsonStart, jsonEnd + 1);
@@ -67,7 +69,7 @@ function cleanAndParseJSON(jsonString: string): any {
         const parsed = JSON.parse(cleaned);
         console.log('Successfully parsed JSON after cleaning');
         return parsed;
-      } catch (parseError) {
+      } catch {
         console.log('Cleaned JSON still invalid, attempting reconstruction...');
         
         // If the JSON is incomplete, try to complete it
@@ -90,7 +92,7 @@ function cleanAndParseJSON(jsonString: string): any {
             const parsed = JSON.parse(cleaned);
             console.log('Successfully parsed JSON after completion');
             return parsed;
-          } catch (finalError) {
+          } catch {
             console.log('JSON completion failed, falling back to manual reconstruction');
           }
         }
@@ -103,13 +105,13 @@ function cleanAndParseJSON(jsonString: string): any {
 }
 
 // Manual JSON reconstruction for severely malformed responses
-function attemptManualJSONReconstruction(jsonString: string): any {
+function attemptManualJSONReconstruction(jsonString: string): unknown {
   try {
     console.log('Attempting manual JSON reconstruction...');
     console.log('Input string preview:', jsonString.substring(0, 500));
     
     // Try multiple approaches to extract week data
-    let reconstructedWeeks: any[] = [];
+    let reconstructedWeeks: unknown[] = [];
     
     // Approach 1: Try to extract complete week objects with better regex
     const weekObjectMatches = jsonString.match(/\{\s*"unit":\s*"[^"]*Week\s+\d+[^"]*"[^}]*"tasks":\s*\[[^\]]*\]\s*\}/g);
@@ -121,7 +123,7 @@ function attemptManualJSONReconstruction(jsonString: string): any {
         try {
           const cleanMatch = weekMatch.replace(/\s+/g, ' ').trim();
           return JSON.parse(cleanMatch);
-        } catch (err) {
+        } catch {
           console.warn(`Failed to parse week object ${index + 1}, creating fallback`);
           return {
             unit: `Week ${index + 1} (fallback)`,
@@ -146,7 +148,7 @@ function attemptManualJSONReconstruction(jsonString: string): any {
             const tasksPart = tasksMatches[i];
             const weekObject = `{${unitPart},${tasksPart}}`;
             reconstructedWeeks.push(JSON.parse(weekObject));
-          } catch (err) {
+          } catch {
             console.warn(`Failed to reconstruct week ${i + 1}, creating fallback`);
             reconstructedWeeks.push({
               unit: `Week ${i + 1} (reconstructed)`,
@@ -229,9 +231,6 @@ export async function taskBreakdown(values: TaskBreakdownInput): Promise<TaskBre
       result = await generateSingleBreakdown(values, totalWeeks, hoursPerWeek);
     }
 
-    // Track successful task breakdown generation
-    await analyticsService.incrementTaskBreakdowns(values.task);
-    
     return result;
   } catch (error) {
     await serverLogger.logError(error as Error, 'Task Breakdown');
@@ -436,7 +435,7 @@ Respond with valid JSON only.`
     }
 
     // Validate the structure before Zod parsing
-    if (!parsedArgs.breakdown) {
+    if (!hasBreakdownProperty(parsedArgs)) {
       console.error('Missing breakdown in parsed response:', parsedArgs);
       throw new Error('OpenAI response missing breakdown field');
     }
@@ -448,12 +447,17 @@ Respond with valid JSON only.`
       console.error('Zod validation failed:', zodError);
       console.log('Attempting to fix common structure issues...');
       
+      // Type guard for breakdown array
+      function isBreakdownArray(arr: unknown): arr is Array<{ unit?: unknown; tasks?: unknown }> {
+        return Array.isArray(arr);
+      }
+      
       // Try to fix common structure issues
       const fixedArgs = {
-        breakdown: Array.isArray(parsedArgs.breakdown) 
-          ? parsedArgs.breakdown.map((week: any, index: number) => ({
+        breakdown: isBreakdownArray(parsedArgs.breakdown) 
+          ? parsedArgs.breakdown.map((week: { unit?: unknown; tasks?: unknown }, index: number) => ({
               unit: typeof week.unit === 'string' ? week.unit : `Week ${index + 1} (${hoursPerWeek} hours total)`,
-              tasks: Array.isArray(week.tasks) ? week.tasks.filter((task: any) => typeof task === 'string') : 
+              tasks: Array.isArray(week.tasks) ? week.tasks.filter((task: unknown) => typeof task === 'string') : 
                      [`Default task for week ${index + 1}`, `WEEK END MILESTONE: Complete week ${index + 1} objectives`]
             }))
           : []
@@ -613,7 +617,7 @@ Respond with valid JSON only.`
 
   const parsedArgs = cleanAndParseJSON(choice.message.content);
   
-  if (!parsedArgs.breakdown || !Array.isArray(parsedArgs.breakdown)) {
+  if (!hasBreakdownProperty(parsedArgs) || !Array.isArray(parsedArgs.breakdown)) {
     throw new Error('Invalid chunk response structure');
   }
 
