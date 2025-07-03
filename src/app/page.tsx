@@ -260,7 +260,7 @@ const Home: NextPage = () => {
           <ErrorBoundary>
             {taskBreakdownResult && !isLoadingBreakdown && !isLoadingSummary && (
               <div className="space-y-6">
-                <EmailExport onSubmitEmail={handleEmailSubmit} isExporting={isSubmittingEmail} />
+                <EmailExport onSubmitEmail={handleEmailSubmit} />
                 <DownloadBreakdown 
                   breakdown={taskBreakdownResult?.breakdown ?? []} 
                   onDownload={() => {}} 

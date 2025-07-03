@@ -45,11 +45,15 @@ export async function POST(request: NextRequest) {
   }
 }
 
-function createEmailTemplate(taskBreakdown: any): string {
+function createEmailTemplate(taskBreakdown: {
+  task: string;
+  breakdown: Array<{ unit: string; tasks: string[] }>;
+  summary?: string;
+}): string {
   const { task, breakdown, summary } = taskBreakdown;
   
   const breakdownHtml = breakdown
-    .map((week: any) => `
+    .map((week) => `
       <div style="margin-bottom: 24px; padding: 16px; border-left: 4px solid #3b82f6; background-color: #f8fafc;">
         <h3 style="color: #1e40af; font-size: 18px; margin-bottom: 8px;">${week.unit}</h3>
         <ul style="margin: 0; padding-left: 20px;">

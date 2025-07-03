@@ -3,7 +3,7 @@
 import type * as React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Loader2, Mail, FileText } from 'lucide-react';
+import { Mail, FileText } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -22,10 +22,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 
 interface EmailExportProps {
   onSubmitEmail: (values: EmailExportFormValues) => Promise<void>;
-  isExporting: boolean;
 }
 
-export function EmailExport({ onSubmitEmail, isExporting }: EmailExportProps): React.JSX.Element {
+export function EmailExport({ onSubmitEmail }: EmailExportProps): React.JSX.Element {
   const form = useForm<EmailExportFormValues>({
     resolver: zodResolver(EmailExportFormSchema),
     defaultValues: {

@@ -88,8 +88,8 @@ export function DownloadBreakdown({ breakdown, onDownload }: DownloadBreakdownPr
       };
       
       let pageNum = 1;
-      let { page, startY } = addNewPage(pageNum);
-      let currentY = startY;
+      let { page, startY: initialStartY } = addNewPage(pageNum);
+      let currentY = initialStartY;
       
       // Pre-load fonts
       const boldFont = await pdfDoc.embedFont('Helvetica-Bold');

@@ -33,12 +33,12 @@ interface TaskInputFormProps {
   isLoading: boolean;
 }
 
-const formDefaultValues: TaskBreakdownFormValues = {
+const formDefaultValues: Partial<TaskBreakdownFormValues> = {
   task: '',
-  targetTime: undefined as any, // Start empty so user sees placeholder
+  targetTime: undefined,
   targetTimeUnit: 'days',
   planGranularity: 'weekly',
-  hoursPerDayCommitment: undefined as any, // Start empty so user sees placeholder
+  hoursPerDayCommitment: undefined,
   skillLevel: 'beginner', // Default to beginner
 };
 
@@ -56,12 +56,10 @@ export function TaskInputForm({ onSubmit, isLoading }: TaskInputFormProps): Reac
     defaultValues: formDefaultValues,
   });
 
-  const { watch, setValue, getValues } = form;
+  const { watch } = form;
   const watchedTargetTimeUnit = watch('targetTimeUnit');
   const watchedTargetTime = watch('targetTime');
   const watchedHoursPerDayCommitment = watch('hoursPerDayCommitment');
-  
-  const prevTargetTimeUnit = usePrevious(watchedTargetTimeUnit);
 
   // Calculate if the current inputs would exceed plan duration limits
   const calculatePlanDuration = () => {
@@ -282,7 +280,7 @@ export function TaskInputForm({ onSubmit, isLoading }: TaskInputFormProps): Reac
                       />
                     </FormControl>
                     <FormDescription>
-                      Hours you'll dedicate per day. This determines your weekly time commitment (7 × daily hours).
+                      Hours you&apos;ll dedicate per day. This determines your weekly time commitment (7 × daily hours).
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
