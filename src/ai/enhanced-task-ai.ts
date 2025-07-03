@@ -40,7 +40,6 @@ export class EnhancedTaskAI {
     );
     
     const averageTasksPerWeek = totalTasks / totalWeeks;
-    const planDurationMonths = Math.ceil(totalWeeks / 4);
 
     // Determine complexity based on multiple factors including skill level
     let complexity: 'low' | 'medium' | 'high' = 'medium';

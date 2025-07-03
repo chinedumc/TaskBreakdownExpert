@@ -2,8 +2,7 @@
 "use client";
 
 import * as React from 'react';
-import type { ReactNode } from 'react';
-import { DownloadCloud, FileText, FileDown } from 'lucide-react';
+import { FileText, FileDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import type { TaskBreakdownOutput } from '@/ai/flows/task-breakdown';
