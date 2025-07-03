@@ -1,7 +1,6 @@
 import { Resend } from 'resend';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { analyticsService } from '@/utils/unified-analytics';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -38,9 +37,6 @@ export async function POST(request: NextRequest) {
       console.error('Email sending failed:', error);
       return NextResponse.json({ error: 'Failed to send email' }, { status: 500 });
     }
-
-    // Track successful email send
-    await analyticsService.incrementEmailsSent();
 
     return NextResponse.json({ success: true, messageId: data?.id });
   } catch (error) {

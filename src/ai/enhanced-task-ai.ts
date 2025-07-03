@@ -1,4 +1,3 @@
-import { ai } from './openai';
 import type { TaskBreakdownFormValues } from '@/lib/schemas';
 import type { TaskBreakdownOutput } from './flows/task-breakdown';
 

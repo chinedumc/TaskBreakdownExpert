@@ -11,7 +11,6 @@
 
 import { ai, DEFAULT_MODEL } from '@/ai/openai';
 import { ServerLogger } from '@/utils/logger';
-import { analyticsService } from '@/utils/unified-analytics';
 const serverLogger = new ServerLogger();
 import { z } from 'zod';
 
@@ -229,9 +228,6 @@ export async function taskBreakdown(values: TaskBreakdownInput): Promise<TaskBre
       result = await generateSingleBreakdown(values, totalWeeks, hoursPerWeek);
     }
 
-    // Track successful task breakdown generation
-    await analyticsService.incrementTaskBreakdowns(values.task);
-    
     return result;
   } catch (error) {
     await serverLogger.logError(error as Error, 'Task Breakdown');

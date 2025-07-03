@@ -34,7 +34,6 @@ export function DownloadBreakdown({ breakdown, onDownload }: DownloadBreakdownPr
         body: JSON.stringify({ downloadType }),
       });
       
-      // Track in user analytics if callback provided
       onDownload?.();
     } catch (error) {
       console.error('Failed to track download:', error);
