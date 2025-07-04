@@ -1,11 +1,12 @@
 "use client";
 
-import type * as React from 'react';
-import { CheckCircle, ListChecks, Activity } from 'lucide-react';
+import * as React from 'react';
+import { CheckCircle, ListChecks, Activity, Quote } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { TaskBreakdownOutput } from '@/ai/flows/task-breakdown';
+import { getRandomQuote, formatQuote } from '@/utils/quotes';
 
 interface TaskBreakdownDisplayProps {
   summary: string | null;
@@ -20,6 +21,9 @@ export function TaskBreakdownDisplay({
   isLoadingSummary,
   isLoadingBreakdown,
 }: TaskBreakdownDisplayProps): React.JSX.Element | null {
+  // Get a random quote when the component mounts
+  const [inspirationalQuote] = React.useState(() => getRandomQuote());
+
   if (isLoadingSummary || isLoadingBreakdown) {
     return (
       <div className="space-y-6 w-full">
@@ -56,6 +60,23 @@ export function TaskBreakdownDisplay({
 
   return (
     <div className="space-y-6 w-full">
+      {/* Inspirational Quote Card */}
+      {(summary || breakdown) && (
+        <Card className="shadow-lg bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg text-blue-900">
+              <Quote className="h-6 w-6 text-blue-600" />
+              Daily Inspiration
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <blockquote className="text-blue-800 italic text-lg leading-relaxed">
+              {formatQuote(inspirationalQuote)}
+            </blockquote>
+          </CardContent>
+        </Card>
+      )}
+
       {summary && (
         <Card className="shadow-lg bg-secondary/50">
           <CardHeader>
